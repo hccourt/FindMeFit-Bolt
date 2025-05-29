@@ -130,6 +130,11 @@ export const useClassStore = create<ClassState>()(
     fetchClasses: async () => {
       set({ isLoading: true });
       try {
+        const { currentRegion } = useRegionStore.getState();
+        if (!currentRegion || !currentRegion.bounds) {
+          throw new Error('Region not properly configured');
+        }
+
         const { data: classesData, error: classesError } = await supabase
           .from('classes')
           .select(`
@@ -168,6 +173,21 @@ export const useClassStore = create<ClassState>()(
         
         if (classesError) throw classesError;
         
+        // Filter classes by region bounds before processing
+        const filteredClassesData = classesData.filter(item => {
+          if (!item.coordinates) return false;
+          const coordsMatch = item.coordinates.match(/\(([-\d.]+),([-\d.]+)\)/);
+          if (!coordsMatch) return false;
+          
+          const lat = parseFloat(coordsMatch[1]);
+          const lon = parseFloat(coordsMatch[2]);
+          
+          return lat >= currentRegion.bounds.south &&
+                 lat <= currentRegion.bounds.north &&
+                 lon >= currentRegion.bounds.west &&
+                 lon <= currentRegion.bounds.east;
+        });
+
         const user = useAuthStore.getState().user;
         let bookingsData: any[] = [];
         
@@ -181,7 +201,7 @@ export const useClassStore = create<ClassState>()(
           bookingsData = userBookings || [];
         }
         
-        const transformedData = classesData.map(item => {
+        const transformedData = filteredClassesData.map(item => {
           let coordinates = null;
           if (item.coordinates) {
             const coordsMatch = item.coordinates.match(/\(([-\d.]+),([-\d.]+)\)/);
