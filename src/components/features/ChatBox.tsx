@@ -87,7 +87,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ classId, isOpen, onClose }) =>
         isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >
-      <Card className="w-full max-w-lg">
+      <Card className="w-full max-w-lg relative z-[60]">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Class Chat</CardTitle>
           <Button

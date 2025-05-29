@@ -30,7 +30,7 @@ export const Map: React.FC<MapProps> = ({
   className,
 }) => {
   return (
-    <div style={{ height }} className={className}>
+    <div style={{ height }} className={cn('relative z-0', className)}>
       <MapContainer
         center={center}
         zoom={zoom}
