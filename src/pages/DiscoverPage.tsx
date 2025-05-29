@@ -33,15 +33,17 @@ export const DiscoverPage: React.FC = () => {
     if (classes.length > 0) {
       let result = [...classes];
 
-      // Filter by region first
-      result = result.filter(classItem => {
-        if (!classItem.location.coordinates) return false;
-        return isCoordinateInRegion(
-          classItem.location.coordinates.latitude,
-          classItem.location.coordinates.longitude,
-          currentRegion.bounds
-        );
-      });
+      // Skip region filtering if bounds are not available
+      if (currentRegion && currentRegion.bounds) {
+        result = result.filter(classItem => {
+          if (!classItem.location.coordinates) return false;
+          return isCoordinateInRegion(
+            classItem.location.coordinates.latitude,
+            classItem.location.coordinates.longitude,
+            currentRegion.bounds
+          );
+        });
+      }
       
       // Apply search term filter
       if (searchTerm) {
@@ -74,7 +76,7 @@ export const DiscoverPage: React.FC = () => {
       
       setFilteredClasses(result);
     }
-  }, [classes, searchTerm, filters, currentRegion.bounds]);
+  }, [classes, searchTerm, filters, currentRegion]);
   
   const toggleFilter = (filterType: 'type' | 'level', value: string) => {
     setFilters((prev) => {
@@ -327,7 +329,7 @@ export const DiscoverPage: React.FC = () => {
           {hasActiveFilters() && (
             <div className="mt-4 flex flex-wrap gap-2">
               {searchTerm && (
-                <Badge variant="primary\" size="md\" className="flex items-center gap-1">
+                <Badge variant="primary" size="md" className="flex items-center gap-1">
                   Search: {searchTerm}
                   <button
                     onClick={() => setSearchTerm('')}

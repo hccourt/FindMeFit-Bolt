@@ -18,6 +18,10 @@ export const HomePage: React.FC = () => {
   }, [fetchClasses, currentRegion.id]);
 
   const filteredClasses = React.useMemo(() => {
+    if (!currentRegion || !currentRegion.bounds) {
+      return [];
+    }
+
     return classes.filter(classItem => {
       if (!classItem.location.coordinates) return false;
       return isCoordinateInRegion(
@@ -26,7 +30,7 @@ export const HomePage: React.FC = () => {
         currentRegion.bounds
       );
     });
-  }, [classes, currentRegion.bounds]);
+  }, [classes, currentRegion]);
   
   return (
     <Layout>
