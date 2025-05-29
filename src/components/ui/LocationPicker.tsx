@@ -59,7 +59,11 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => 
     setLocation(location);
     
     // Get the country from the parent location name
-    const country = location.parent?.name?.split(', ').pop();
+    let country = '';
+    if (location.parent?.name) {
+      const parts = location.parent.name.split(', ');
+      country = parts[parts.length - 1];
+    }
     
     // Map countries to regions
     const countryToRegion: Record<string, string> = {
@@ -89,10 +93,15 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => 
     };
     
     // Set the region based on the country
-    if (country && countryToRegion[country]) {
-      useRegionStore.getState().setRegion(countryToRegion[country]);
-      // Trigger a class refresh after region change
-      useClassStore.getState().fetchClasses();
+    const regionId = country && countryToRegion[country];
+    if (regionId) {
+      const regionStore = useRegionStore.getState();
+      regionStore.setRegion(regionId);
+      
+      // Ensure we have the updated region before fetching classes
+      setTimeout(() => {
+        useClassStore.getState().fetchClasses();
+      }, 0);
     }
     
     // Show save prompt if user is logged in and doesn't have a location set
