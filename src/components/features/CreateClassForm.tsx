@@ -208,7 +208,7 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                       />
                       <Button
                         type="button"
-                        className="mt-7"
+                        className="self-end mb-[1px]"
                         onClick={handlePostalCodeSearch}
                         disabled={!postalCode || !venueName || isSearching}
                       >
@@ -217,21 +217,21 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                     </div>
                   </div>
                     
-                    {selectedVenue && (
-                      <div className="rounded-lg overflow-hidden border border-neutral-200">
-                        <Map
-                          center={[selectedVenue.coordinates.latitude, selectedVenue.coordinates.longitude]}
-                          zoom={15}
-                          locations={[{
-                            id: 'selected-venue',
-                            name: selectedVenue.name,
-                            type: 'city',
-                            coordinates: selectedVenue.coordinates
-                          }]}
-                          height="200px"
-                        />
-                      </div>
-                    )}
+                  {selectedVenue && (
+                    <div className="rounded-lg overflow-hidden border border-neutral-200 mt-4">
+                      <Map
+                        center={[selectedVenue.coordinates.latitude, selectedVenue.coordinates.longitude]}
+                        zoom={15}
+                        locations={[{
+                          id: 'selected-venue',
+                          name: selectedVenue.name,
+                          type: 'city',
+                          coordinates: selectedVenue.coordinates
+                        }]}
+                        height="200px"
+                      />
+                    </div>
+                  )}
                   
                 </div>
                 
