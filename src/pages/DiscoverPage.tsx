@@ -32,6 +32,16 @@ export const DiscoverPage: React.FC = () => {
   useEffect(() => {
     if (classes.length > 0) {
       let result = [...classes];
+
+      // Filter by region first
+      result = result.filter(classItem => {
+        if (!classItem.location.coordinates) return false;
+        return isCoordinateInRegion(
+          classItem.location.coordinates.latitude,
+          classItem.location.coordinates.longitude,
+          currentRegion.bounds
+        );
+      });
       
       // Apply search term filter
       if (searchTerm) {
@@ -64,7 +74,7 @@ export const DiscoverPage: React.FC = () => {
       
       setFilteredClasses(result);
     }
-  }, [classes, searchTerm, filters]);
+  }, [classes, searchTerm, filters, currentRegion.bounds]);
   
   const toggleFilter = (filterType: 'type' | 'level', value: string) => {
     setFilters((prev) => {

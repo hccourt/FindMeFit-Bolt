@@ -610,6 +610,12 @@ const regions: Record<string, RegionSettings> = {
     useMetric: false,
     distanceUnit: 'mi',
     temperatureUnit: 'F',
+    bounds: {
+      north: 49.384358,  // Northern tip of mainland US
+      south: 24.396308,  // Southern tip of mainland US
+      east: -66.934570,  // Eastern tip of mainland US
+      west: -125.000000, // Western tip of mainland US
+    }
   },
   gb: {
     id: 'gb',
@@ -620,6 +626,12 @@ const regions: Record<string, RegionSettings> = {
     useMetric: true,
     distanceUnit: 'km',
     temperatureUnit: 'C',
+    bounds: {
+      north: 58.635500,  // Northern tip of Scotland
+      south: 49.892485,  // Southern tip of England
+      east: 1.759000,    // Eastern tip of England
+      west: -8.649000,   // Western tip of Ireland
+    }
   },
   eu: {
     id: 'eu',
@@ -630,6 +642,12 @@ const regions: Record<string, RegionSettings> = {
     useMetric: true,
     distanceUnit: 'km',
     temperatureUnit: 'C',
+    bounds: {
+      north: 71.185474,  // Northern tip of Norway
+      south: 35.000000,  // Southern tip of Greece
+      east: 31.000000,   // Eastern tip of Finland
+      west: -9.500000,   // Western tip of Portugal
+    }
   },
 };
 

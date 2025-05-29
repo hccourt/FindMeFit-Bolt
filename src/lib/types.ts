@@ -24,6 +24,12 @@ export interface RegionSettings {
   useMetric: boolean;
   distanceUnit: 'km' | 'mi';
   temperatureUnit: 'C' | 'F';
+  bounds: {
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  };
 }
 
 export interface Venue {

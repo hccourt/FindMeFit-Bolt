@@ -92,3 +92,16 @@ export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2
 
   return R * c; // Distance in meters
 }
+
+export function isCoordinateInRegion(
+  lat: number,
+  lon: number,
+  bounds: { north: number; south: number; east: number; west: number }
+): boolean {
+  return (
+    lat <= bounds.north &&
+    lat >= bounds.south &&
+    lon <= bounds.east &&
+    lon >= bounds.west
+  );
+}

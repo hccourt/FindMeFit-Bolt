@@ -15,6 +15,17 @@ export const HomePage: React.FC = () => {
   useEffect(() => {
     fetchClasses();
   }, [fetchClasses, currentRegion.id]);
+
+  const filteredClasses = React.useMemo(() => {
+    return classes.filter(classItem => {
+      if (!classItem.location.coordinates) return false;
+      return isCoordinateInRegion(
+        classItem.location.coordinates.latitude,
+        classItem.location.coordinates.longitude,
+        currentRegion.bounds
+      );
+    });
+  }, [classes, currentRegion.bounds]);
   
   return (
     <Layout>
@@ -46,9 +57,9 @@ export const HomePage: React.FC = () => {
                   ></div>
                 ))}
             </div>
-          ) : classes.length > 0 ? (
+          ) : filteredClasses.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {classes.slice(0, 3).map((classItem) => (
+              {filteredClasses.slice(0, 3).map((classItem) => (
                 <ClassCard key={classItem.id} classItem={classItem} />
               ))}
             </div>
