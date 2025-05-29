@@ -7,6 +7,7 @@ import { Button } from '../components/ui/Button';
 import { ClassCard } from '../components/features/ClassCard';
 import { Hero } from '../components/features/Hero';
 import { useClassStore, useRegionStore } from '../lib/store';
+import { isCoordinateInRegion } from '../lib/utils';
 
 export const HomePage: React.FC = () => {
   const { classes, fetchClasses, isLoading } = useClassStore();
