@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/Badge';
 import { Filter, Search, X } from 'lucide-react';
 import { useClassStore, useRegionStore } from '../lib/store';
 import { Class } from '../lib/types';
+import { isCoordinateInRegion } from '../lib/utils';
 
 export const DiscoverPage: React.FC = () => {
   const { classes, fetchClasses, isLoading } = useClassStore();
@@ -329,7 +330,7 @@ export const DiscoverPage: React.FC = () => {
           {hasActiveFilters() && (
             <div className="mt-4 flex flex-wrap gap-2">
               {searchTerm && (
-                <Badge variant="primary\" size="md\" className="flex items-center gap-1">
+                <Badge variant="primary" size="md" className="flex items-center gap-1">
                   Search: {searchTerm}
                   <button
                     onClick={() => setSearchTerm('')}
