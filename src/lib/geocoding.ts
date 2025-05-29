@@ -1,6 +1,6 @@
 import { Location } from './types';
 
-const NOMINATIM_API = 'https://nominatim.openstreetmap.org';
+const NOMINATIM_API = '/api/nominatim';
 
 export interface GeocodingResult {
   place_id: number;
@@ -73,6 +73,9 @@ export async function searchLocations(query: string): Promise<Location[]> {
   
   try {
     const response = await fetch(`${NOMINATIM_API}/search?${params}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const results: GeocodingResult[] = await response.json();
     
     // Process and filter results based on similarity
