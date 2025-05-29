@@ -3,7 +3,7 @@ import { MapPin, Search, X, Clock } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Location } from '../../lib/types';
 import { Map } from './Map';
-import { useLocationStore, useRegionStore, useAuthStore } from '../../lib/store';
+import { useLocationStore, useRegionStore, useAuthStore, useClassStore } from '../../lib/store';
 import { Button } from './Button';
 
 interface LocationPickerProps {
