@@ -63,8 +63,7 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
         const city = location.parent?.name.split(',')[0] || '';
         
         // Check if venue already exists
-        const existingV
-enue = await findVenueByDetails(venueName, postalCode, city);
+        const existingVenue = await findVenueByDetails(venueName, postalCode, city);
         
         if (existingVenue) {
           setSelectedVenue(existingVenue);
