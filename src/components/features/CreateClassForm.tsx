@@ -241,9 +241,8 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                                   }}
                                 >
                                   + Add New Venue
-                                  )}
                                 </button>
-                              ))}
+                              )}
                             </div>
                           )}
                         </div>
