@@ -3,11 +3,11 @@ export type UserRole = 'client' | 'instructor' | 'admin';
 export interface Location {
   id: string;
   name: string;
-  type: 'city' | 'region' | 'country';
+  type: 'city' | 'region' | 'country' | 'venue';
   parent?: {
     id: string;
     name: string;
-    type: 'region' | 'country';
+    type: 'region' | 'country' | 'address';
   };
   coordinates?: {
     latitude: number;
