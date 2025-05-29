@@ -35,7 +35,24 @@ export const DashboardPage: React.FC = () => {
   const upcomingBookings = React.useMemo(() => {
     if (!bookings || !classes) return [];
     
-    return bookings 
+    // For instructors, show their created classes
+    if (user?.role === 'instructor') {
+      return classes
+        .filter(c => c.instructor.id === user.id)
+        .filter(c => new Date(c.startTime) > new Date())
+        .sort((a, b) => 
+          new Date(a.startTime).getTime() - 
+          new Date(b.startTime).getTime()
+        )
+        .map(classItem => ({
+          id: classItem.id,
+          status: 'instructor',
+          classDetails: classItem
+        }));
+    }
+    
+    // For clients, show their booked classes
+    return bookings
       .filter(booking => booking.status === 'confirmed')
       .map(booking => {
         const classDetails = classes.find(c => c.id === booking.class_id);
@@ -54,7 +71,24 @@ export const DashboardPage: React.FC = () => {
   const completedBookings = React.useMemo(() => {
     if (!bookings || !classes) return [];
     
-    return bookings 
+    // For instructors, show their past classes
+    if (user?.role === 'instructor') {
+      return classes
+        .filter(c => c.instructor.id === user.id)
+        .filter(c => new Date(c.startTime) <= new Date())
+        .sort((a, b) => 
+          new Date(b.startTime).getTime() - 
+          new Date(a.startTime).getTime()
+        )
+        .map(classItem => ({
+          id: classItem.id,
+          status: 'instructor',
+          classDetails: classItem
+        }));
+    }
+    
+    // For clients, show their completed bookings
+    return bookings
       .filter(booking => booking.status === 'confirmed')
       .map(booking => {
         const classDetails = classes.find(c => c.id === booking.class_id);
@@ -178,12 +212,19 @@ export const DashboardPage: React.FC = () => {
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-600 mb-4">
                       <Calendar className="w-6 h-6" />
                     </div>
-                    <h3 className="text-lg font-medium mb-2">No upcoming classes</h3>
+                    <h3 className="text-lg font-medium mb-2">
+                      {user.role === 'instructor' ? 'No upcoming classes created' : 'No upcoming classes'}
+                    </h3>
                     <p className="text-neutral-600 mb-4">
-                      You haven't booked any classes yet. Start exploring classes to book your next session.
+                      {user.role === 'instructor' 
+                        ? "You haven't created any classes yet."
+                        : "You haven't booked any classes yet. Start exploring classes to book your next session."
+                      }
                     </p>
-                    <Link to="/discover">
-                      <Button>Browse Classes</Button>
+                    <Link to={user.role === 'instructor' ? '/instructor' : '/discover'}>
+                      <Button>
+                        {user.role === 'instructor' ? 'Create Class' : 'Browse Classes'}
+                      </Button>
                     </Link>
                   </div>
                 )}
