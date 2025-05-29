@@ -36,13 +36,17 @@ export const useClassStore = create<ClassState>()(
         
         if (error) throw error;
         
-        return data.map(venue => ({
-          ...venue,
-          coordinates: {
-            latitude: venue.coordinates[0],
-            longitude: venue.coordinates[1]
-          }
-        }));
+        return data.map(venue => {
+          // Parse coordinates string from (lat,lng) format
+          const coordsMatch = venue.coordinates.match(/\(([-\d.]+),([-\d.]+)\)/);
+          return {
+            ...venue,
+            coordinates: coordsMatch ? {
+              latitude: parseFloat(coordsMatch[1]),
+              longitude: parseFloat(coordsMatch[2])
+            } : null
+          };
+        });
       } catch (error) {
         console.error('Error searching venues:', error);
         return [];
@@ -62,11 +66,17 @@ export const useClassStore = create<ClassState>()(
         
         if (error) throw error;
         
+        // Parse coordinates string from (lat,lng) format
+        const coordsMatch = data.coordinates.match(/\(([-\d.]+),([-\d.]+)\)/);
+        if (!coordsMatch) {
+          throw new Error('Invalid coordinates format received from database');
+        }
+        
         return {
           ...data,
           coordinates: {
-            latitude: data.coordinates[0],
-            longitude: data.coordinates[1]
+            latitude: parseFloat(coordsMatch[1]),
+            longitude: parseFloat(coordsMatch[2])
           }
         };
       } catch (error) {
@@ -148,18 +158,16 @@ export const useClassStore = create<ClassState>()(
         }
         
         const transformedData = classesData.map(item => {
-          // Safely parse coordinates
+          // Parse coordinates string from (lat,lng) format
           let coordinates = null;
-          if (Array.isArray(item.coordinates) && 
-              item.coordinates.length === 2 && 
-              typeof item.coordinates[0] === 'number' && 
-              typeof item.coordinates[1] === 'number' && 
-              !isNaN(item.coordinates[0]) && 
-              !isNaN(item.coordinates[1])) {
-            coordinates = {
-              latitude: item.coordinates[0],
-              longitude: item.coordinates[1]
-            };
+          if (item.coordinates) {
+            const coordsMatch = item.coordinates.match(/\(([-\d.]+),([-\d.]+)\)/);
+            if (coordsMatch) {
+              coordinates = {
+                latitude: parseFloat(coordsMatch[1]),
+                longitude: parseFloat(coordsMatch[2])
+              };
+            }
           }
 
           // Check if user has booked this class
@@ -731,7 +739,7 @@ export const useStore = create<StoreState>((set) => ({
         .from('bookings')
         .select('id, status')
         .eq('class_id', classId)
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .not('status', 'eq', 'cancelled')
         .maybeSingle();
       
@@ -782,18 +790,6 @@ export const useStore = create<StoreState>((set) => ({
       }));
       
       return data;
-
-      set(state => ({
-        classes: state.classes.map(c => {
-          if (c.id === classId) {
-            return {
-              ...c,
-              currentParticipants: c.currentParticipants + 1,
-            };
-          }
-          return c;
-        })
-      }));
     } catch (error) {
       console.error('Error booking class:', error);
       throw error;
