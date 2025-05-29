@@ -1,21 +1,29 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { Map } from '../ui/Map';
 import { useAuthStore, useClassStore } from '../../lib/store';
+import { searchLocations } from '../../lib/geocoding';
+import { Location } from '../../lib/types';
 
 interface CreateClassFormProps {
   onClose: () => void;
 }
 
+interface VenueDetails {
+  name: string;
+  address: string;
+  city: string;
+  coordinates: [number, number];
+}
+
 interface ClassFormData {
   title: string;
   description: string;
-  locationName: string;
-  locationAddress: string;
-  locationCity: string;
+  venue: VenueDetails;
   startTime: string;
   endTime: string;
   price: number;
@@ -29,12 +37,47 @@ interface ClassFormData {
 export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => {
   const { user } = useAuthStore();
   const { createClass, isLoading } = useClassStore();
+  const [searchResults, setSearchResults] = React.useState<Location[]>([]);
+  const [selectedVenue, setSelectedVenue] = React.useState<VenueDetails | null>(null);
+  const [isSearching, setIsSearching] = React.useState(false);
   
   const {
     register,
+    control,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<ClassFormData>();
+  
+  const locationSearch = watch('venue.name', '');
+  
+  React.useEffect(() => {
+    const searchTimer = setTimeout(async () => {
+      if (locationSearch.length >= 3) {
+        setIsSearching(true);
+        const results = await searchLocations(locationSearch);
+        setSearchResults(results);
+        setIsSearching(false);
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+    
+    return () => clearTimeout(searchTimer);
+  }, [locationSearch]);
+  
+  const handleVenueSelect = (location: Location) => {
+    if (!location.coordinates) return;
+    
+    const venue: VenueDetails = {
+      name: location.name,
+      address: location.parent?.name || '',
+      city: location.parent?.name?.split(', ')[0] || '',
+      coordinates: [location.coordinates.latitude, location.coordinates.longitude]
+    };
+    
+    setSelectedVenue(venue);
+  };
   
   const onSubmit = async (data: ClassFormData) => {
     if (!user) return;
@@ -42,14 +85,18 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
     try {
       const tags = data.tags.split(',').map(tag => tag.trim());
       
+      if (!selectedVenue) {
+        throw new Error('Please select a valid venue');
+      }
+      
       await createClass({
         title: data.title,
         description: data.description,
         instructor_id: user.id,
-        location_name: data.locationName,
-        location_address: data.locationAddress,
-        location_city: data.locationCity,
-        location_coordinates: '(0,0)', // TODO: Add location picker
+        location_name: selectedVenue.name,
+        location_address: selectedVenue.address,
+        location_city: selectedVenue.city,
+        location_coordinates: `(${selectedVenue.coordinates[0]},${selectedVenue.coordinates[1]})`,
         start_time: new Date(data.startTime).toISOString(),
         end_time: new Date(data.endTime).toISOString(),
         price: data.price,
@@ -106,23 +153,74 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Location Name"
-                  {...register('locationName', { required: 'Location name is required' })}
-                  error={errors.locationName?.message}
-                />
-                
-                <Input
-                  label="Location Address"
-                  {...register('locationAddress', { required: 'Address is required' })}
-                  error={errors.locationAddress?.message}
-                />
-                
-                <Input
-                  label="City"
-                  {...register('locationCity', { required: 'City is required' })}
-                  error={errors.locationCity?.message}
-                />
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Venue Location
+                  </label>
+                  <div className="space-y-4">
+                    <Controller
+                      name="venue.name"
+                      control={control}
+                      rules={{ required: 'Venue is required' }}
+                      render={({ field }) => (
+                        <div className="relative">
+                          <Input
+                            placeholder="Search for a venue..."
+                            {...field}
+                            error={errors.venue?.name?.message}
+                          />
+                          {isSearching && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                              <div className="animate-spin h-4 w-4 border-2 border-primary-500 rounded-full border-t-transparent"></div>
+                            </div>
+                          )}
+                          {searchResults.length > 0 && (
+                            <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                              {searchResults.map((location) => (
+                                <button
+                                  key={location.id}
+                                  type="button"
+                                  className="w-full px-4 py-2 text-left hover:bg-neutral-50"
+                                  onClick={() => {
+                                    handleVenueSelect(location);
+                                    field.onChange(location.name);
+                                    setSearchResults([]);
+                                  }}
+                                >
+                                  <div className="font-medium">{location.name}</div>
+                                  {location.parent && (
+                                    <div className="text-sm text-neutral-500">
+                                      {location.parent.name}
+                                    </div>
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    />
+                    
+                    {selectedVenue && (
+                      <div className="rounded-lg overflow-hidden border border-neutral-200">
+                        <Map
+                          center={selectedVenue.coordinates}
+                          zoom={15}
+                          locations={[{
+                            id: 'selected-venue',
+                            name: selectedVenue.name,
+                            type: 'city',
+                            coordinates: {
+                              latitude: selectedVenue.coordinates[0],
+                              longitude: selectedVenue.coordinates[1]
+                            }
+                          }]}
+                          height="200px"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
                 
                 <Input
                   label="Image URL"
@@ -212,6 +310,11 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
             </div>
             
             <div className="flex justify-end space-x-4 pt-4 border-t border-border">
+              {selectedVenue && (
+                <div className="flex-1 text-sm text-neutral-600">
+                  Selected venue: <span className="font-medium">{selectedVenue.name}</span>
+                </div>
+              )}
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
