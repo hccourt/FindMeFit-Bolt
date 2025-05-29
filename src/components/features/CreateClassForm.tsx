@@ -37,7 +37,7 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
   const [showNewVenueForm, setShowNewVenueForm] = React.useState(false);
   const [newVenueData, setNewVenueData] = React.useState({
     name: '',
-    address: '',
+    postal_code: '',
     city: '',
     coordinates: null as Location['coordinates'] | null
   });
@@ -77,7 +77,7 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
     
     try {
       // First search for the location using geocoding
-      const results = await searchLocations(`${newVenueData.name}, ${newVenueData.address}, ${newVenueData.city}`);
+      const results = await searchLocations(`${newVenueData.name}, ${newVenueData.postal_code}, ${newVenueData.city}`);
       
       if (results.length === 0) {
         throw new Error('Could not verify location coordinates');
@@ -91,7 +91,7 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
       // Create new venue
       const venue = await createVenue({
         name: newVenueData.name,
-        address: newVenueData.address,
+        postal_code: newVenueData.postal_code,
         city: newVenueData.city,
         coordinates: location.coordinates
       });
@@ -220,7 +220,7 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                                     <div>
                                       <div className="font-medium">{location.name}</div>
                                       <div className="text-sm text-neutral-500">
-                                        {location.address}, {location.city}
+                                        {location.postal_code}, {location.city}
                                       </div>
                                     </div>
                                     {location.verified && (
@@ -263,11 +263,11 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                             }))}
                           />
                           <Input
-                            label="Address"
-                            value={newVenueData.address}
+                            label="Postal Code"
+                            value={newVenueData.postal_code}
                             onChange={(e) => setNewVenueData(prev => ({
                               ...prev,
-                              address: e.target.value
+                              postal_code: e.target.value
                             }))}
                           />
                           <Input
@@ -289,7 +289,7 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                             <Button
                               type="button"
                               onClick={handleAddNewVenue}
-                              disabled={!newVenueData.name || !newVenueData.address || !newVenueData.city}
+                              disabled={!newVenueData.name || !newVenueData.postal_code || !newVenueData.city}
                             >
                               Add Venue
                             </Button>

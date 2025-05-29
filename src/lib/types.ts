@@ -29,7 +29,7 @@ export interface RegionSettings {
 export interface Venue {
   id: string;
   name: string;
-  address: string;
+  postal_code: string;
   city: string;
   coordinates: {
     latitude: number;
