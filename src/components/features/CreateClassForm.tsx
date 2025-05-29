@@ -4,11 +4,12 @@ import { X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
 import { Map } from '../ui/Map';
 import { useAuthStore, useClassStore } from '../../lib/store';
 import { Location, Venue } from '../../lib/types';
 import { searchLocations } from '../../lib/geocoding';
+import { Badge } from '../ui/Badge';
+import { MapPin } from 'lucide-react';
 
 interface CreateClassFormProps {
   onClose: () => void;
@@ -31,16 +32,11 @@ interface ClassFormData {
 export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => {
   const { user } = useAuthStore();
   const { createClass, searchVenues, createVenue, isLoading } = useClassStore();
-  const [searchResults, setSearchResults] = React.useState<Venue[]>([]);
   const [selectedVenue, setSelectedVenue] = React.useState<Venue | null>(null);
   const [isSearching, setIsSearching] = React.useState(false);
-  const [showNewVenueForm, setShowNewVenueForm] = React.useState(false);
-  const [newVenueData, setNewVenueData] = React.useState({
-    name: '',
-    postal_code: '',
-    city: '',
-    coordinates: null as Location['coordinates'] | null
-  });
+  const [locationResults, setLocationResults] = React.useState<Location[]>([]);
+  const [venueName, setVenueName] = React.useState('');
+  const [postalCode, setPostalCode] = React.useState('');
   
   const {
     register,
@@ -50,6 +46,38 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
     formState: { errors },
   } = useForm<ClassFormData>();
   
+  const handlePostalCodeSearch = async () => {
+    if (!postalCode || !venueName) return;
+    
+    try {
+      setIsSearching(true);
+      const results = await searchLocations(postalCode);
+      setLocationResults(results);
+      
+      if (results.length > 0) {
+        const location = results[0];
+        if (!location.coordinates) {
+          throw new Error('Location coordinates not found');
+        }
+        
+        const venue = await createVenue({
+          name: venueName,
+          postal_code: postalCode,
+          city: location.parent?.name.split(',')[0] || '',
+          coordinates: location.coordinates
+        });
+        
+        setSelectedVenue(venue);
+        setLocationResults([]);
+      }
+    } catch (error) {
+      console.error('Error searching location:', error);
+      alert('Could not find location. Please check the postal code.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+  
   const locationSearch = watch('venue_id', '');
   
   React.useEffect(() => {
@@ -57,10 +85,10 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
       if (locationSearch.length >= 3) {
         setIsSearching(true);
         const results = await searchVenues(locationSearch);
-        setSearchResults(results);
+        setLocationResults(results);
         setIsSearching(false);
       } else {
-        setSearchResults([]);
+        setLocationResults([]);
       }
     }, 300);
     
@@ -69,39 +97,6 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
   
   const handleVenueSelect = (venue: Venue) => {
     setSelectedVenue(venue);
-    setShowNewVenueForm(false);
-  };
-  
-  const handleAddNewVenue = async () => {
-    if (!user?.role === 'instructor') return;
-    
-    try {
-      // First search for the location using geocoding
-      const results = await searchLocations(`${newVenueData.name}, ${newVenueData.postal_code}, ${newVenueData.city}`);
-      
-      if (results.length === 0) {
-        throw new Error('Could not verify location coordinates');
-      }
-      
-      const location = results[0];
-      if (!location.coordinates) {
-        throw new Error('Location coordinates not found');
-      }
-      
-      // Create new venue
-      const venue = await createVenue({
-        name: newVenueData.name,
-        postal_code: newVenueData.postal_code,
-        city: newVenueData.city,
-        coordinates: location.coordinates
-      });
-      
-      setSelectedVenue(venue);
-      setShowNewVenueForm(false);
-    } catch (error) {
-      console.error('Error creating venue:', error);
-      alert('Error creating venue. Please try again.');
-    }
   };
     
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
@@ -183,120 +178,32 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-foreground mb-1">
-                    Venue Location
+                    Add New Venue
                   </label>
-                  <div className="space-y-2">
-                    <Controller
-                      name="venue_id"
-                      control={control}
-                      rules={{ required: 'Venue is required' }}
-                      render={({ field }) => (
-                        <div className="relative">
-                          <Input
-                            placeholder="Search for a venue..."
-                            onKeyDown={handleSearchKeyDown}
-                            {...field}
-                            error={errors.venue_id?.message}
-                          />
-                          {isSearching && (
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                              <div className="animate-spin h-4 w-4 border-2 border-primary-500 rounded-full border-t-transparent"></div>
-                            </div>
-                          )}
-                          {(searchResults.length > 0 || locationSearch.length >= 3) && (
-                            <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                              {searchResults.map((location) => (
-                                <button
-                                  key={location.id}
-                                  type="button"
-                                  className="w-full px-4 py-2 text-left hover:bg-neutral-50"
-                                  onClick={() => {
-                                    handleVenueSelect(location);
-                                    field.onChange(location.id);
-                                    setSearchResults([]);
-                                  }}
-                                >
-                                  <div className="flex items-center justify-between">
-                                    <div>
-                                      <div className="font-medium">{location.name}</div>
-                                      <div className="text-sm text-neutral-500">
-                                        {location.postal_code}, {location.city}
-                                      </div>
-                                    </div>
-                                    {location.verified && (
-                                      <Badge variant="success" size="sm">Verified</Badge>
-                                    )}
-                                  </div>
-                                </button>
-                              ))}
-                              {locationSearch.length >= 3 && (
-                                <button
-                                  type="button"
-                                  className="w-full px-4 py-2 text-left hover:bg-neutral-50 text-primary-600 font-medium"
-                                  onClick={() => {
-                                    setShowNewVenueForm(true);
-                                    setNewVenueData(prev => ({
-                                      ...prev,
-                                      name: locationSearch
-                                    }));
-                                  }}
-                                >
-                                  + Add New Venue
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="Venue Name"
+                      value={venueName}
+                      onChange={(e) => setVenueName(e.target.value)}
+                      placeholder="Enter venue name"
                     />
-                    
-                    {showNewVenueForm && (
-                      <div className="mt-4 p-4 border border-neutral-200 rounded-lg">
-                        <h4 className="font-medium mb-4">Add New Venue</h4>
-                        <div className="space-y-4">
-                          <Input
-                            label="Venue Name"
-                            value={newVenueData.name}
-                            onChange={(e) => setNewVenueData(prev => ({
-                              ...prev,
-                              name: e.target.value
-                            }))}
-                          />
-                          <Input
-                            label="Postal Code"
-                            value={newVenueData.postal_code}
-                            onChange={(e) => setNewVenueData(prev => ({
-                              ...prev,
-                              postal_code: e.target.value
-                            }))}
-                          />
-                          <Input
-                            label="City"
-                            value={newVenueData.city}
-                            onChange={(e) => setNewVenueData(prev => ({
-                              ...prev,
-                              city: e.target.value
-                            }))}
-                          />
-                          <div className="flex justify-end space-x-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setShowNewVenueForm(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              type="button"
-                              onClick={handleAddNewVenue}
-                              disabled={!newVenueData.name || !newVenueData.postal_code || !newVenueData.city}
-                            >
-                              Add Venue
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    <div className="flex gap-2">
+                      <Input
+                        label="Postal Code"
+                        value={postalCode}
+                        onChange={(e) => setPostalCode(e.target.value)}
+                        placeholder="Enter postal code"
+                      />
+                      <Button
+                        type="button"
+                        className="mt-7"
+                        onClick={handlePostalCodeSearch}
+                        disabled={!postalCode || !venueName || isSearching}
+                      >
+                        <MapPin className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                     
                     {selectedVenue && (
                       <div className="rounded-lg overflow-hidden border border-neutral-200">
@@ -313,7 +220,7 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                         />
                       </div>
                     )}
-                  </div>
+                  
                 </div>
                 
                 <Input
