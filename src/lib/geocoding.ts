@@ -78,9 +78,11 @@ export async function searchLocations(query: string): Promise<Location[]> {
     // Process and filter results based on similarity
     const processedResults = results
       .map(result => {
+        // Compare full display name with query for better matching
+        const similarity = stringSimilarity(result.display_name, query);
+        
         // Get the most specific name (city/town)
         const name = result.address?.city || result.address?.town || result.display_name.split(',')[0];
-        const similarity = stringSimilarity(name, query);
         
         // Get parent location (state/region and country)
         const parentName = [
@@ -106,7 +108,7 @@ export async function searchLocations(query: string): Promise<Location[]> {
           },
         };
       })
-      .filter(({ similarity }) => similarity > 0.2)
+      .filter(({ similarity }) => similarity > 0.1) // Lower threshold for more permissive matching
       .sort((a, b) => {
         // Sort by similarity and then by name length (prefer shorter names)
         if (Math.abs(b.similarity - a.similarity) > 0.1) {
