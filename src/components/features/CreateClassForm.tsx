@@ -8,6 +8,7 @@ import { Badge } from '../ui/Badge';
 import { Map } from '../ui/Map';
 import { useAuthStore, useClassStore } from '../../lib/store';
 import { Location, Venue } from '../../lib/types';
+import { searchLocations } from '../../lib/geocoding';
 
 interface CreateClassFormProps {
   onClose: () => void;
