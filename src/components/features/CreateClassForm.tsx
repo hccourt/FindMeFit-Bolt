@@ -6,7 +6,7 @@ import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { Map } from '../ui/Map';
 import { useAuthStore, useClassStore } from '../../lib/store';
-import { Location, Venue } from '../../lib/types';
+import { Location, Venue, CreateClassRpcPayload } from '../../lib/types';
 import { searchLocations } from '../../lib/geocoding';
 import { Badge } from '../ui/Badge';
 import { MapPin } from 'lucide-react';
@@ -63,7 +63,8 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
         const city = location.parent?.name.split(',')[0] || '';
         
         // Check if venue already exists
-        const existingVenue = await findVenueByDetails(venueName, postalCode, city);
+        const existingV
+enue = await findVenueByDetails(venueName, postalCode, city);
         
         if (existingVenue) {
           setSelectedVenue(existingVenue);
@@ -127,11 +128,14 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
         throw new Error('Please select a valid venue');
       }
       
-      await createClass({
+      const classData: CreateClassRpcPayload = {
         title: data.title,
         description: data.description,
         instructor_id: user.id,
-        venue_id: selectedVenue.id,
+        location_name: selectedVenue.name,
+        location_address: selectedVenue.postal_code,
+        location_city: selectedVenue.city,
+        location_coordinates: `(${selectedVenue.coordinates.latitude},${selectedVenue.coordinates.longitude})`,
         start_time: new Date(data.startTime).toISOString(),
         end_time: new Date(data.endTime).toISOString(),
         price: data.price,
@@ -140,8 +144,9 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
         level: data.level,
         tags,
         image_url: data.imageUrl,
-      });
+      };
       
+      await createClass(classData);
       onClose();
     } catch (error) {
       console.error('Error creating class:', error);

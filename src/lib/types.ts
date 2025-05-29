@@ -79,6 +79,24 @@ export interface Class {
   updated_at?: string;
 }
 
+export interface CreateClassRpcPayload {
+  title: string;
+  description: string;
+  instructor_id: string;
+  location_name: string;
+  location_address: string;
+  location_city: string;
+  location_coordinates: string;
+  start_time: string;
+  end_time: string;
+  price: number;
+  max_participants: number;
+  type: 'group' | 'personal';
+  level: 'beginner' | 'intermediate' | 'advanced' | 'all';
+  tags: string[];
+  image_url?: string;
+}
+
 export interface Booking {
   id: string;
   classId: string;

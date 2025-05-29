@@ -1,14 +1,14 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { supabase } from './supabase';
-import { Class, Booking, User, Location, RegionSettings, UserRole } from './types';
+import { Class, Booking, User, Location, RegionSettings, UserRole, CreateClassRpcPayload } from './types';
 import { searchLocations as searchLocationsApi } from './geocoding';
 
 interface ClassState {
   classes: Class[];
   bookings: Booking[];
   isLoading: boolean;
-  createClass: (classData: Omit<Class, 'id' | 'instructor' | 'currentParticipants'>) => Promise<void>;
+  createClass: (classData: CreateClassRpcPayload) => Promise<void>;
   fetchClasses: () => Promise<void>;
   searchVenues: (query: string) => Promise<Venue[]>;
   findVenueByDetails: (name: string, postalCode: string, city: string) => Promise<Venue | null>;
@@ -111,7 +111,7 @@ export const useClassStore = create<ClassState>()(
       }
     },
     
-    createClass: async (classData) => {
+    createClass: async (classData: CreateClassRpcPayload) => {
       set({ isLoading: true });
       try {
         const { error } = await supabase
