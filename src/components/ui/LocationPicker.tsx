@@ -58,42 +58,41 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => 
   const handleLocationSelect = (location: Location) => {
     setLocation(location);
     
-    if (location.parent?.name) {
-      const parts = location.parent.name.split(', ');
-      const country = parts[parts.length - 1];
-      
-      const countryToRegion: Record<string, string> = {
-        'United Kingdom': 'gb',
-        'United States': 'us',
-        'Germany': 'eu',
-        'France': 'eu',
-        'Italy': 'eu',
-        'Spain': 'eu',
-        'Netherlands': 'eu',
-        'Belgium': 'eu',
-        'Austria': 'eu',
-        'Switzerland': 'ch',
-        'Australia': 'au',
-        'Canada': 'ca',
-        'Japan': 'jp',
-        'China': 'cn',
-        'Singapore': 'sg',
-        'India': 'in',
-        'Brazil': 'br',
-        'Russia': 'ru',
-        'South Africa': 'za',
-        'Mexico': 'mx',
-        'United Arab Emirates': 'ae',
-        'New Zealand': 'nz',
-        'Thailand': 'th',
-      };
-      
-      const regionId = countryToRegion[country];
-      if (regionId) {
-        useRegionStore.getState().setRegion(regionId);
-        // Trigger a class refresh after region change
-        useClassStore.getState().fetchClasses();
-      }
+    // Get the country from the parent location name
+    const country = location.parent?.name?.split(', ').pop();
+    
+    // Map countries to regions
+    const countryToRegion: Record<string, string> = {
+      'United Kingdom': 'gb',
+      'United States': 'us',
+      'Germany': 'eu',
+      'France': 'eu',
+      'Italy': 'eu',
+      'Spain': 'eu',
+      'Netherlands': 'eu',
+      'Belgium': 'eu',
+      'Austria': 'eu',
+      'Switzerland': 'ch',
+      'Australia': 'au',
+      'Canada': 'ca',
+      'Japan': 'jp',
+      'China': 'cn',
+      'Singapore': 'sg',
+      'India': 'in',
+      'Brazil': 'br',
+      'Russia': 'ru',
+      'South Africa': 'za',
+      'Mexico': 'mx',
+      'United Arab Emirates': 'ae',
+      'New Zealand': 'nz',
+      'Thailand': 'th',
+    };
+    
+    // Set the region based on the country
+    if (country && countryToRegion[country]) {
+      useRegionStore.getState().setRegion(countryToRegion[country]);
+      // Trigger a class refresh after region change
+      useClassStore.getState().fetchClasses();
     }
     
     // Show save prompt if user is logged in and doesn't have a location set
