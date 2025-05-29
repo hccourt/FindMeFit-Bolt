@@ -4,26 +4,19 @@ import { X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 import { Map } from '../ui/Map';
 import { useAuthStore, useClassStore } from '../../lib/store';
-import { searchLocations } from '../../lib/geocoding';
-import { Location } from '../../lib/types';
+import { Location, Venue } from '../../lib/types';
 
 interface CreateClassFormProps {
   onClose: () => void;
 }
 
-interface VenueDetails {
-  name: string;
-  address: string;
-  city: string;
-  coordinates: [number, number];
-}
-
 interface ClassFormData {
   title: string;
   description: string;
-  venue: VenueDetails;
+  venue_id: string;
   startTime: string;
   endTime: string;
   price: number;
@@ -36,10 +29,17 @@ interface ClassFormData {
 
 export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => {
   const { user } = useAuthStore();
-  const { createClass, isLoading } = useClassStore();
-  const [searchResults, setSearchResults] = React.useState<Location[]>([]);
-  const [selectedVenue, setSelectedVenue] = React.useState<VenueDetails | null>(null);
+  const { createClass, searchVenues, createVenue, isLoading } = useClassStore();
+  const [searchResults, setSearchResults] = React.useState<Venue[]>([]);
+  const [selectedVenue, setSelectedVenue] = React.useState<Venue | null>(null);
   const [isSearching, setIsSearching] = React.useState(false);
+  const [showNewVenueForm, setShowNewVenueForm] = React.useState(false);
+  const [newVenueData, setNewVenueData] = React.useState({
+    name: '',
+    address: '',
+    city: '',
+    coordinates: null as Location['coordinates'] | null
+  });
   
   const {
     register,
@@ -49,13 +49,13 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
     formState: { errors },
   } = useForm<ClassFormData>();
   
-  const locationSearch = watch('venue.name', '');
+  const locationSearch = watch('venue_id', '');
   
   React.useEffect(() => {
     const searchTimer = setTimeout(async () => {
       if (locationSearch.length >= 3) {
         setIsSearching(true);
-        const results = await searchLocations(locationSearch);
+        const results = await searchVenues(locationSearch);
         setSearchResults(results);
         setIsSearching(false);
       } else {
@@ -66,19 +66,49 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
     return () => clearTimeout(searchTimer);
   }, [locationSearch]);
   
-  const handleVenueSelect = (location: Location) => {
-    if (!location.coordinates) return;
-    
-    const venue: VenueDetails = {
-      name: location.name,
-      address: location.parent?.name || '',
-      city: location.parent?.name?.split(', ')[0] || '',
-      coordinates: [location.coordinates.latitude, location.coordinates.longitude]
-    };
-    
+  const handleVenueSelect = (venue: Venue) => {
     setSelectedVenue(venue);
+    setShowNewVenueForm(false);
   };
   
+  const handleAddNewVenue = async () => {
+    if (!user?.role === 'instructor') return;
+    
+    try {
+      // First search for the location using geocoding
+      const results = await searchLocations(`${newVenueData.name}, ${newVenueData.address}, ${newVenueData.city}`);
+      
+      if (results.length === 0) {
+        throw new Error('Could not verify location coordinates');
+      }
+      
+      const location = results[0];
+      if (!location.coordinates) {
+        throw new Error('Location coordinates not found');
+      }
+      
+      // Create new venue
+      const venue = await createVenue({
+        name: newVenueData.name,
+        address: newVenueData.address,
+        city: newVenueData.city,
+        coordinates: location.coordinates
+      });
+      
+      setSelectedVenue(venue);
+      setShowNewVenueForm(false);
+    } catch (error) {
+      console.error('Error creating venue:', error);
+      alert('Error creating venue. Please try again.');
+    }
+  };
+    
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  };
+    
   const onSubmit = async (data: ClassFormData) => {
     if (!user) return;
     
@@ -93,10 +123,7 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
         title: data.title,
         description: data.description,
         instructor_id: user.id,
-        location_name: selectedVenue.name,
-        location_address: selectedVenue.address,
-        location_city: selectedVenue.city,
-        location_coordinates: `(${selectedVenue.coordinates[0]},${selectedVenue.coordinates[1]})`,
+        venue_id: selectedVenue.id,
         start_time: new Date(data.startTime).toISOString(),
         end_time: new Date(data.endTime).toISOString(),
         price: data.price,
@@ -157,24 +184,25 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Venue Location
                   </label>
-                  <div className="space-y-4">
+                  <div className="space-y-2">
                     <Controller
-                      name="venue.name"
+                      name="venue_id"
                       control={control}
                       rules={{ required: 'Venue is required' }}
                       render={({ field }) => (
                         <div className="relative">
                           <Input
                             placeholder="Search for a venue..."
+                            onKeyDown={handleSearchKeyDown}
                             {...field}
-                            error={errors.venue?.name?.message}
+                            error={errors.venue_id?.message}
                           />
                           {isSearching && (
                             <div className="absolute right-3 top-1/2 -translate-y-1/2">
                               <div className="animate-spin h-4 w-4 border-2 border-primary-500 rounded-full border-t-transparent"></div>
                             </div>
                           )}
-                          {searchResults.length > 0 && (
+                          {(searchResults.length > 0 || locationSearch.length >= 3) && (
                             <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                               {searchResults.map((location) => (
                                 <button
@@ -183,15 +211,36 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                                   className="w-full px-4 py-2 text-left hover:bg-neutral-50"
                                   onClick={() => {
                                     handleVenueSelect(location);
-                                    field.onChange(location.name);
+                                    field.onChange(location.id);
                                     setSearchResults([]);
                                   }}
                                 >
-                                  <div className="font-medium">{location.name}</div>
-                                  {location.parent && (
-                                    <div className="text-sm text-neutral-500">
-                                      {location.parent.name}
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <div className="font-medium">{location.name}</div>
+                                      <div className="text-sm text-neutral-500">
+                                        {location.address}, {location.city}
+                                      </div>
                                     </div>
+                                    {location.verified && (
+                                      <Badge variant="success" size="sm">Verified</Badge>
+                                    )}
+                                  </div>
+                                </button>
+                              ))}
+                              {locationSearch.length >= 3 && (
+                                <button
+                                  type="button"
+                                  className="w-full px-4 py-2 text-left hover:bg-neutral-50 text-primary-600 font-medium"
+                                  onClick={() => {
+                                    setShowNewVenueForm(true);
+                                    setNewVenueData(prev => ({
+                                      ...prev,
+                                      name: locationSearch
+                                    }));
+                                  }}
+                                >
+                                  + Add New Venue
                                   )}
                                 </button>
                               ))}
@@ -201,19 +250,64 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                       )}
                     />
                     
+                    {showNewVenueForm && (
+                      <div className="mt-4 p-4 border border-neutral-200 rounded-lg">
+                        <h4 className="font-medium mb-4">Add New Venue</h4>
+                        <div className="space-y-4">
+                          <Input
+                            label="Venue Name"
+                            value={newVenueData.name}
+                            onChange={(e) => setNewVenueData(prev => ({
+                              ...prev,
+                              name: e.target.value
+                            }))}
+                          />
+                          <Input
+                            label="Address"
+                            value={newVenueData.address}
+                            onChange={(e) => setNewVenueData(prev => ({
+                              ...prev,
+                              address: e.target.value
+                            }))}
+                          />
+                          <Input
+                            label="City"
+                            value={newVenueData.city}
+                            onChange={(e) => setNewVenueData(prev => ({
+                              ...prev,
+                              city: e.target.value
+                            }))}
+                          />
+                          <div className="flex justify-end space-x-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setShowNewVenueForm(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={handleAddNewVenue}
+                              disabled={!newVenueData.name || !newVenueData.address || !newVenueData.city}
+                            >
+                              Add Venue
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     {selectedVenue && (
                       <div className="rounded-lg overflow-hidden border border-neutral-200">
                         <Map
-                          center={selectedVenue.coordinates}
+                          center={[selectedVenue.coordinates.latitude, selectedVenue.coordinates.longitude]}
                           zoom={15}
                           locations={[{
                             id: 'selected-venue',
                             name: selectedVenue.name,
                             type: 'city',
-                            coordinates: {
-                              latitude: selectedVenue.coordinates[0],
-                              longitude: selectedVenue.coordinates[1]
-                            }
+                            coordinates: selectedVenue.coordinates
                           }]}
                           height="200px"
                         />
@@ -312,7 +406,10 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
             <div className="flex justify-end space-x-4 pt-4 border-t border-border">
               {selectedVenue && (
                 <div className="flex-1 text-sm text-neutral-600">
-                  Selected venue: <span className="font-medium">{selectedVenue.name}</span>
+                  Selected venue: <span className="font-medium">{selectedVenue.name}</span>{' '}
+                  {selectedVenue.verified && (
+                    <Badge variant="success" size="sm">Verified</Badge>
+                  )}
                 </div>
               )}
               <Button type="button" variant="outline" onClick={onClose}>

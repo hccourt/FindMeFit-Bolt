@@ -10,6 +10,8 @@ interface ClassState {
   isLoading: boolean;
   createClass: (classData: Omit<Class, 'id' | 'instructor' | 'currentParticipants'>) => Promise<void>;
   fetchClasses: () => Promise<void>;
+  searchVenues: (query: string) => Promise<Venue[]>;
+  createVenue: (venueData: Omit<Venue, 'id' | 'verified' | 'verified_at' | 'verified_by'>) => Promise<Venue>;
   fetchBookings: (userId: string) => Promise<void>;
   bookClass: (classId: string, userId: string) => Promise<void>;
   cancelBooking: (bookingId: string) => Promise<void>;
@@ -21,6 +23,57 @@ export const useClassStore = create<ClassState>()(
     classes: [],
     bookings: [],
     isLoading: false,
+    
+    searchVenues: async (query: string) => {
+      if (!query || query.length < 2) return [];
+      
+      try {
+        const { data, error } = await supabase
+          .from('venues')
+          .select('*')
+          .ilike('name', `%${query}%`)
+          .limit(10);
+        
+        if (error) throw error;
+        
+        return data.map(venue => ({
+          ...venue,
+          coordinates: {
+            latitude: venue.coordinates[0],
+            longitude: venue.coordinates[1]
+          }
+        }));
+      } catch (error) {
+        console.error('Error searching venues:', error);
+        return [];
+      }
+    },
+    
+    createVenue: async (venueData) => {
+      try {
+        const { data, error } = await supabase
+          .from('venues')
+          .insert([{
+            ...venueData,
+            coordinates: `(${venueData.coordinates.latitude},${venueData.coordinates.longitude})`
+          }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        return {
+          ...data,
+          coordinates: {
+            latitude: data.coordinates[0],
+            longitude: data.coordinates[1]
+          }
+        };
+      } catch (error) {
+        console.error('Error creating venue:', error);
+        throw error;
+      }
+    },
     
     createClass: async (classData) => {
       set({ isLoading: true });

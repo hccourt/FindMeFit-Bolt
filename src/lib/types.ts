@@ -26,6 +26,20 @@ export interface RegionSettings {
   temperatureUnit: 'C' | 'F';
 }
 
+export interface Venue {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  verified: boolean;
+  verified_at?: string;
+  verified_by?: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -50,15 +64,7 @@ export interface Class {
   title: string;
   description: string;
   instructor: Instructor;
-  location: {
-    name: string;
-    city: string;
-    address: string;
-    coordinates: {
-      latitude: number;
-      longitude: number;
-    } | null;
-  };
+  venue: Venue;
   startTime: string;
   endTime: string;
   price: number;
