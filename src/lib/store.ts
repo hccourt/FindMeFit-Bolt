@@ -666,7 +666,7 @@ const regions: Record<string, RegionSettings> = {
       north: 71.185474,  // Northern tip of Norway
       south: 35.000000,  // Southern tip of Greece
       east: 31.000000,   // Eastern tip of Finland
-      west: -9.500000,   // Western tip of Portugal
+      west: -0.500000,   // Western boundary moved east to exclude GB
     }
   },
 };
