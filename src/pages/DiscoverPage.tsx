@@ -327,7 +327,7 @@ export const DiscoverPage: React.FC = () => {
           {hasActiveFilters() && (
             <div className="mt-4 flex flex-wrap gap-2">
               {searchTerm && (
-                <Badge variant="primary" size="md" className="flex items-center gap-1">
+                <Badge variant="primary\" size="md\" className="flex items-center gap-1">
                   Search: {searchTerm}
                   <button
                     onClick={() => setSearchTerm('')}
