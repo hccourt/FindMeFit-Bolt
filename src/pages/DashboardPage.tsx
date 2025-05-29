@@ -35,20 +35,32 @@ export const DashboardPage: React.FC = () => {
   const upcomingBookings = React.useMemo(() => {
     if (!bookings || !classes) return [];
     
-    // For instructors, show their created classes
+    // For instructors, show both created and booked classes
     if (user?.role === 'instructor') {
-      return classes
+      const createdClasses = classes
         .filter(c => c.instructor.id === user.id)
         .filter(c => new Date(c.startTime) > new Date())
-        .sort((a, b) => 
-          new Date(a.startTime).getTime() - 
-          new Date(b.startTime).getTime()
-        )
         .map(classItem => ({
           id: classItem.id,
           status: 'instructor',
           classDetails: classItem
         }));
+
+      const bookedClasses = bookings
+        .filter(booking => booking.status === 'confirmed')
+        .map(booking => {
+          const classDetails = classes.find(c => c.id === booking.class_id);
+          return classDetails ? { ...booking, classDetails } : null;
+        })
+        .filter((booking): booking is NonNullable<typeof booking> => {
+          if (!booking || !booking.classDetails) return false;
+          return new Date(booking.classDetails.startTime) > new Date();
+        });
+
+      return [...createdClasses, ...bookedClasses].sort((a, b) =>
+        new Date(a.classDetails.startTime).getTime() -
+        new Date(b.classDetails.startTime).getTime()
+      );
     }
     
     // For clients, show their booked classes
@@ -71,20 +83,32 @@ export const DashboardPage: React.FC = () => {
   const completedBookings = React.useMemo(() => {
     if (!bookings || !classes) return [];
     
-    // For instructors, show their past classes
+    // For instructors, show both created and completed classes
     if (user?.role === 'instructor') {
-      return classes
+      const createdClasses = classes
         .filter(c => c.instructor.id === user.id)
         .filter(c => new Date(c.startTime) <= new Date())
-        .sort((a, b) => 
-          new Date(b.startTime).getTime() - 
-          new Date(a.startTime).getTime()
-        )
         .map(classItem => ({
           id: classItem.id,
           status: 'instructor',
           classDetails: classItem
         }));
+
+      const completedClasses = bookings
+        .filter(booking => booking.status === 'confirmed')
+        .map(booking => {
+          const classDetails = classes.find(c => c.id === booking.class_id);
+          return classDetails ? { ...booking, classDetails } : null;
+        })
+        .filter((booking): booking is NonNullable<typeof booking> => {
+          if (!booking || !booking.classDetails) return false;
+          return new Date(booking.classDetails.startTime) <= new Date();
+        });
+
+      return [...createdClasses, ...completedClasses].sort((a, b) =>
+        new Date(b.classDetails.startTime).getTime() -
+        new Date(a.classDetails.startTime).getTime()
+      );
     }
     
     // For clients, show their completed bookings
@@ -175,13 +199,16 @@ export const DashboardPage: React.FC = () => {
                         className="flex items-center p-4 border rounded-lg hover:border-primary-500 transition-colors"
                       >
                         <img
-                          src={booking.classDetails?.imageUrl || 'https://images.pexels.com/photos/4498151/pexels-photo-4498151.jpeg'}
-                          alt={booking.classDetails?.title}
+                          src={booking.classDetails.imageUrl || 'https://images.pexels.com/photos/4498151/pexels-photo-4498151.jpeg'}
+                          alt={booking.classDetails.title}
                           className="w-24 h-24 object-cover rounded-lg"
                         />
                         <div className="ml-4 flex-1">
                           <h3 className="font-semibold text-lg">
-                            {booking.classDetails?.title}
+                            {booking.classDetails.title}
+                            {booking.status === 'instructor' && (
+                              <span className="ml-2 text-sm text-primary-600">(Created by you)</span>
+                            )}
                           </h3>
                           <div className="mt-2 space-y-1 text-sm text-neutral-600">
                             <div className="flex items-center">
@@ -197,11 +224,11 @@ export const DashboardPage: React.FC = () => {
                             </div>
                             <div className="flex items-center">
                               <MapPin className="w-4 h-4 mr-2" />
-                              <span>{booking.classDetails?.location.name}</span>
+                              <span>{booking.classDetails.location.name}</span>
                             </div>
                           </div>
                         </div>
-                        <Link to={`/classes/${booking.classDetails?.id}`}>
+                        <Link to={`/classes/${booking.classDetails.id}`}>
                           <Button variant="outline">View Details</Button>
                         </Link>
                       </div>
