@@ -31,7 +31,7 @@ interface ClassFormData {
 
 export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => {
   const { user } = useAuthStore();
-  const { createClass, searchVenues, createVenue, isLoading } = useClassStore();
+  const { createClass, searchVenues, createVenue, findVenueByDetails, isLoading } = useClassStore();
   const [selectedVenue, setSelectedVenue] = React.useState<Venue | null>(null);
   const [isSearching, setIsSearching] = React.useState(false);
   const [locationResults, setLocationResults] = React.useState<Location[]>([]);
@@ -59,15 +59,27 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
         if (!location.coordinates) {
           throw new Error('Location coordinates not found');
         }
+
+        const city = location.parent?.name.split(',')[0] || '';
         
-        const venue = await createVenue({
-          name: venueName,
-          postal_code: postalCode,
-          city: location.parent?.name.split(',')[0] || '',
-          coordinates: location.coordinates
-        });
+        // Check if venue already exists
+        const existingVenue = await findVenueByDetails(venueName, postalCode, city);
         
-        setSelectedVenue(venue);
+        if (existingVenue) {
+          setSelectedVenue(existingVenue);
+          alert('This venue already exists and has been selected.');
+        } else {
+          // Create new venue only if it doesn't exist
+          const venue = await createVenue({
+            name: venueName,
+            postal_code: postalCode,
+            city: city,
+            coordinates: location.coordinates
+          });
+          
+          setSelectedVenue(venue);
+        }
+        
         setLocationResults([]);
       }
     } catch (error) {

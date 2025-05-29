@@ -11,6 +11,7 @@ interface ClassState {
   createClass: (classData: Omit<Class, 'id' | 'instructor' | 'currentParticipants'>) => Promise<void>;
   fetchClasses: () => Promise<void>;
   searchVenues: (query: string) => Promise<Venue[]>;
+  findVenueByDetails: (name: string, postalCode: string, city: string) => Promise<Venue | null>;
   createVenue: (venueData: Omit<Venue, 'id' | 'verified' | 'verified_at' | 'verified_by'>) => Promise<Venue>;
   fetchBookings: (userId: string) => Promise<void>;
   bookClass: (classId: string, userId: string) => Promise<void>;
@@ -37,7 +38,6 @@ export const useClassStore = create<ClassState>()(
         if (error) throw error;
         
         return data.map(venue => {
-          // Parse coordinates string from (lat,lng) format
           const coordsMatch = venue.coordinates.match(/\(([-\d.]+),([-\d.]+)\)/);
           return {
             ...venue,
@@ -50,6 +50,33 @@ export const useClassStore = create<ClassState>()(
       } catch (error) {
         console.error('Error searching venues:', error);
         return [];
+      }
+    },
+
+    findVenueByDetails: async (name: string, postalCode: string, city: string) => {
+      try {
+        const { data, error } = await supabase
+          .from('venues')
+          .select('*')
+          .eq('name', name)
+          .eq('postal_code', postalCode)
+          .eq('city', city)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (!data) return null;
+
+        const coordsMatch = data.coordinates.match(/\(([-\d.]+),([-\d.]+)\)/);
+        return {
+          ...data,
+          coordinates: coordsMatch ? {
+            latitude: parseFloat(coordsMatch[1]),
+            longitude: parseFloat(coordsMatch[2])
+          } : null
+        };
+      } catch (error) {
+        console.error('Error finding venue:', error);
+        return null;
       }
     },
     
@@ -66,7 +93,6 @@ export const useClassStore = create<ClassState>()(
         
         if (error) throw error;
         
-        // Parse coordinates string from (lat,lng) format
         const coordsMatch = data.coordinates.match(/\(([-\d.]+),([-\d.]+)\)/);
         if (!coordsMatch) {
           throw new Error('Invalid coordinates format received from database');
@@ -104,7 +130,6 @@ export const useClassStore = create<ClassState>()(
     fetchClasses: async () => {
       set({ isLoading: true });
       try {
-        // First get all classes with instructor info
         const { data: classesData, error: classesError } = await supabase
           .from('classes')
           .select(`
@@ -143,7 +168,6 @@ export const useClassStore = create<ClassState>()(
         
         if (classesError) throw classesError;
         
-        // Get all bookings for the current user if authenticated
         const user = useAuthStore.getState().user;
         let bookingsData: any[] = [];
         
@@ -158,7 +182,6 @@ export const useClassStore = create<ClassState>()(
         }
         
         const transformedData = classesData.map(item => {
-          // Parse coordinates string from (lat,lng) format
           let coordinates = null;
           if (item.coordinates) {
             const coordsMatch = item.coordinates.match(/\(([-\d.]+),([-\d.]+)\)/);
@@ -170,7 +193,6 @@ export const useClassStore = create<ClassState>()(
             }
           }
 
-          // Check if user has booked this class
           const booking = bookingsData.find(b => b.class_id === item.id);
           const isBooked = booking && booking.status !== 'cancelled';
 
@@ -187,7 +209,7 @@ export const useClassStore = create<ClassState>()(
               bio: item.instructor.bio,
               location: item.instructor.location,
               phone: item.instructor.phone,
-              specialties: [], // Set default empty array since column doesn't exist
+              specialties: [],
               rating: item.instructor.rating || 0,
               reviewCount: item.instructor.review_count || 0,
               experience: item.instructor.experience || 0,
@@ -241,7 +263,6 @@ export const useClassStore = create<ClassState>()(
     bookClass: async (classId: string, userId: string) => {
       set({ isLoading: true });
       try {
-        // First check if there are spots available
         const { data: classData, error: classError } = await supabase
           .from('classes')
           .select('max_participants, current_participants')
@@ -254,7 +275,6 @@ export const useClassStore = create<ClassState>()(
           throw new Error('Class is full');
         }
         
-        // Check if user already has a booking
         const { data: existingBooking, error: bookingCheckError } = await supabase
           .from('bookings')
           .select('id, status')
@@ -266,7 +286,6 @@ export const useClassStore = create<ClassState>()(
         if (bookingCheckError) throw bookingCheckError;
         if (existingBooking) throw new Error('You already have a booking for this class');
         
-        // Create the booking
         const { data: newBooking, error: bookingError } = await supabase
           .from('bookings')
           .insert([
@@ -281,13 +300,11 @@ export const useClassStore = create<ClassState>()(
         
         if (bookingError) throw bookingError;
         
-        // Update local state
         set(state => ({
           bookings: [...state.bookings, newBooking as Booking],
           isLoading: false
         }));
         
-        // Update class participants count
         const { error: updateError } = await supabase
           .from('classes')
           .update({ current_participants: classData.current_participants + 1 })
@@ -295,7 +312,6 @@ export const useClassStore = create<ClassState>()(
         
         if (updateError) throw updateError;
         
-        // Update local classes state
         set(state => ({
           classes: state.classes.map(c => {
             if (c.id === classId) {
@@ -721,7 +737,6 @@ export const useStore = create<StoreState>((set) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
 
-      // First check if there are spots available
       const { data: classData, error: classError } = await supabase
         .from('classes')
         .select('max_participants, current_participants')
@@ -734,7 +749,6 @@ export const useStore = create<StoreState>((set) => ({
         throw new Error('Class is full');
       }
       
-      // Check if user already has a booking
       const { data: existingBooking, error: bookingCheckError } = await supabase
         .from('bookings')
         .select('id, status')
@@ -746,7 +760,6 @@ export const useStore = create<StoreState>((set) => ({
       if (bookingCheckError) throw bookingCheckError;
       if (existingBooking) throw new Error('You already have a booking for this class');
       
-      // Create the booking
       const { data, error } = await supabase
         .from('bookings')
         .insert([
@@ -762,13 +775,11 @@ export const useStore = create<StoreState>((set) => ({
       
       if (error) throw error;
       
-      // Update local state
       set(state => ({
         bookings: [...state.bookings, data as Booking],
         isLoading: false
       }));
       
-      // Update class participants count
       const { error: updateError } = await supabase
         .from('classes')
         .update({ current_participants: classData.current_participants + 1 })
@@ -776,7 +787,6 @@ export const useStore = create<StoreState>((set) => ({
       
       if (updateError) throw updateError;
       
-      // Update local classes state
       set(state => ({
         classes: state.classes.map(c => {
           if (c.id === classId) {
