@@ -35,10 +35,10 @@ export const DashboardPage: React.FC = () => {
   const upcomingBookings = React.useMemo(() => {
     if (!bookings || !classes) return [];
     
-    return bookings
-      .filter(booking => booking && booking.status === 'confirmed')
+    return bookings 
+      .filter(booking => booking.status === 'confirmed')
       .map(booking => {
-        const classDetails = classes.find(c => c && c.id === booking.classId);
+        const classDetails = classes.find(c => c.id === booking.class_id);
         return classDetails ? { ...booking, classDetails } : null;
       })
       .filter((booking): booking is NonNullable<typeof booking> => {
@@ -54,10 +54,10 @@ export const DashboardPage: React.FC = () => {
   const completedBookings = React.useMemo(() => {
     if (!bookings || !classes) return [];
     
-    return bookings
-      .filter(booking => booking && booking.status === 'confirmed')
+    return bookings 
+      .filter(booking => booking.status === 'confirmed')
       .map(booking => {
-        const classDetails = classes.find(c => c && c.id === booking.classId);
+        const classDetails = classes.find(c => c.id === booking.class_id);
         return classDetails ? { ...booking, classDetails } : null;
       })
       .filter((booking): booking is NonNullable<typeof booking> => {
