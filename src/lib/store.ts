@@ -851,7 +851,7 @@ export const useStore = create<StoreState>((set) => ({
 
       const { data: classData, error: classError } = await supabase
         .from('classes')
-        .select('max_participants, current_participants')
+        .select('max_participants')
         .eq('id', classId)
         .single();
       
