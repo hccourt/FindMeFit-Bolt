@@ -199,6 +199,19 @@ export const useClassStore = create<ClassState>()(
         const classIds = filteredClassesData.map(item => item.id);
         console.log('🎯 Class IDs to fetch bookings for:', classIds);
         
+        // First, let's see ALL bookings for these classes (regardless of status)
+        const { data: allBookingsForClasses, error: allBookingsError } = await supabase
+          .from('bookings')
+          .select('class_id, status, user_id, created_at')
+          .in('class_id', classIds);
+        
+        if (allBookingsError) {
+          console.error('Error fetching all bookings:', allBookingsError);
+        } else {
+          console.log('📋 ALL bookings for these classes (any status):', allBookingsForClasses?.length, 'bookings');
+          console.log('📋 All bookings breakdown:', allBookingsForClasses);
+        }
+        
         // Get confirmed bookings ONLY for the filtered classes
         const { data: relevantBookings, error: bookingsError } = await supabase
           .from('bookings')
@@ -212,6 +225,22 @@ export const useClassStore = create<ClassState>()(
         
         console.log('📋 Relevant confirmed bookings:', relevantBookings?.length, 'bookings');
         console.log('📋 Bookings data:', relevantBookings);
+        
+        // Let's also directly query this specific class to see what's in the database
+        if (classIds.length > 0) {
+          const specificClassId = classIds[0]; // Check the first class
+          const { data: directBookings, error: directError } = await supabase
+            .from('bookings')
+            .select('*')
+            .eq('class_id', specificClassId);
+          
+          if (directError) {
+            console.error('Error in direct booking query:', directError);
+          } else {
+            console.log(`🔍 DIRECT query for class ${specificClassId}:`, directBookings?.length, 'total bookings');
+            console.log('🔍 Direct booking details:', directBookings);
+          }
+        }
         
         // Create a map of class_id to participant count
         const participantCounts: Record<string, number> = {};
