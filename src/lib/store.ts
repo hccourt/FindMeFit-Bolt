@@ -135,7 +135,7 @@ export const useClassStore = create<ClassState>()(
           throw new Error('Region not properly configured');
         }
 
-        // First, get all classes with their current_participants from the database
+        // Get all classes from the database
         const { data: classesData, error: classesError } = await supabase
           .from('classes')
           .select(`
@@ -173,6 +173,27 @@ export const useClassStore = create<ClassState>()(
           `);
         
         if (classesError) throw classesError;
+        
+        // Get ALL confirmed bookings for ALL classes to calculate real participant counts
+        const { data: allBookings, error: allBookingsError } = await supabase
+          .from('bookings')
+          .select('class_id, user_id, status')
+          .eq('status', 'confirmed');
+        
+        if (allBookingsError) {
+          console.error('Error fetching all bookings:', allBookingsError);
+        }
+        
+        // Create a map of class_id to participant count
+        const participantCounts: Record<string, number> = {};
+        if (allBookings) {
+          allBookings.forEach(booking => {
+            if (!participantCounts[booking.class_id]) {
+              participantCounts[booking.class_id] = 0;
+            }
+            participantCounts[booking.class_id]++;
+          });
+        }
         
         // Filter classes by region bounds before processing
         const filteredClassesData = classesData.filter(item => {
@@ -223,9 +244,8 @@ export const useClassStore = create<ClassState>()(
           const userBooking = userBookings.find(b => b.class_id === item.id);
           const isBooked = !!userBooking;
           
-          // Use the current_participants from the database directly
-          // This is maintained by database triggers and is always accurate
-          const actualParticipants = item.current_participants || 0;
+          // Get the real participant count from our bookings data
+          const actualParticipants = participantCounts[item.id] || 0;
 
           return {
             id: item.id,
