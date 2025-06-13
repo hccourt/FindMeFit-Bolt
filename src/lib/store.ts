@@ -261,23 +261,6 @@ export const useClassStore = create<ClassState>()(
             .select('*')
             .eq('user_id', user.id);
           
-          if (bookingsError) {
-            console.error('Error fetching user bookings:', bookingsError);
-          } else {
-            console.log('User bookings:', userBookings);
-            bookingsData = userBookings || [];
-          }
-        }
-        
-        const user = useAuthStore.getState().user;
-        let bookingsData: any[] = [];
-        
-        if (user) {
-          const { data: userBookings, error: bookingsError } = await supabase
-            .from('bookings')
-            .select('*')
-            .eq('user_id', user.id);
-          
           if (bookingsError) throw bookingsError;
           bookingsData = userBookings || [];
         }
