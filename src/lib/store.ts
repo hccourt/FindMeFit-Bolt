@@ -314,29 +314,17 @@ export const useClassStore = create<ClassState>()(
     bookClass: async (classId: string, userId: string) => {
       set({ isLoading: true });
       try {
+        // Check if class exists and get max participants
         const { data: classData, error: classError } = await supabase
           .from('classes')
-          .select('max_participants, current_participants')
+          .select('max_participants')
           .eq('id', classId)
           .single();
         
         if (classError) throw classError;
+        if (!classData) throw new Error('Class not found');
         
-        // Get actual participant count from bookings
-        const { data: bookings, error: bookingsError } = await supabase
-          .from('bookings')
-          .select('id')
-          .eq('class_id', classId)
-          .eq('status', 'confirmed');
-        
-        if (bookingsError) throw bookingsError;
-        
-        const actualParticipants = bookings?.length || 0;
-        
-        if (!classData || actualParticipants >= classData.max_participants) {
-          throw new Error('Class is full');
-        }
-        
+        // Check for existing booking
         const { data: existingBooking, error: bookingCheckError } = await supabase
           .from('bookings')
           .select('id, status')
@@ -348,6 +336,22 @@ export const useClassStore = create<ClassState>()(
         if (bookingCheckError) throw bookingCheckError;
         if (existingBooking) throw new Error('You already have a booking for this class');
         
+        // Get current confirmed bookings count
+        const { data: confirmedBookings, error: countError } = await supabase
+          .from('bookings')
+          .select('id')
+          .eq('class_id', classId)
+          .eq('status', 'confirmed');
+        
+        if (countError) throw countError;
+        
+        const currentParticipants = confirmedBookings?.length || 0;
+        
+        if (currentParticipants >= classData.max_participants) {
+          throw new Error('Class is full');
+        }
+        
+        // Create the booking
         const { data: newBooking, error: bookingError } = await supabase
           .from('bookings')
           .insert([
@@ -358,6 +362,7 @@ export const useClassStore = create<ClassState>()(
               booked_at: new Date().toISOString()
             }
           ])
+          .select()
           .single();
         
         if (bookingError) throw bookingError;
@@ -367,17 +372,8 @@ export const useClassStore = create<ClassState>()(
           isLoading: false
         }));
         
-        set(state => ({
-          classes: state.classes.map(c => {
-            if (c.id === classId) {
-              return {
-                ...c,
-                currentParticipants: c.currentParticipants + 1
-              };
-            }
-            return c;
-          })
-        }));
+        // Refresh classes to get updated participant count from database
+        await get().fetchClasses();
         
         return newBooking;
       } catch (error) {
@@ -392,6 +388,16 @@ export const useClassStore = create<ClassState>()(
     cancelBooking: async (bookingId: string) => {
       set({ isLoading: true });
       try {
+        // Get booking details before cancelling
+        const { data: bookingData, error: fetchError } = await supabase
+          .from('bookings')
+          .select('class_id')
+          .eq('id', bookingId)
+          .single();
+        
+        if (fetchError) throw fetchError;
+        
+        // Cancel the booking
         const { error } = await supabase
           .from('bookings')
           .update({ status: 'cancelled' })
@@ -399,10 +405,14 @@ export const useClassStore = create<ClassState>()(
         
         if (error) throw error;
         
+        // Update local state
         set(state => ({
           bookings: state.bookings.filter(b => b.id !== bookingId),
           isLoading: false
         }));
+        
+        // Refresh classes to get updated participant count
+        await get().fetchClasses();
       } catch (error) {
         console.error('Error cancelling booking:', error);
         set({ isLoading: false });
