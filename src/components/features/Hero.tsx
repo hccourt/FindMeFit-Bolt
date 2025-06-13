@@ -18,12 +18,12 @@ export const Hero: React.FC = () => {
           
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto mb-12">
-            <div className="bg-white rounded-full shadow-lg p-2 flex items-center">
+            <div className="bg-white rounded-full shadow-lg p-2 flex items-center focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2 transition-all duration-200">
               <div className="flex-1 min-w-0 px-4">
                 <input
                   type="text"
                   placeholder="Search classes, trainers, or locations"
-                  className="w-full h-12 bg-transparent border-0 focus:ring-0 text-lg text-neutral-900 placeholder:text-neutral-500"
+                  className="w-full h-12 bg-transparent border-0 focus:ring-0 focus:outline-none text-lg text-neutral-900 placeholder:text-neutral-500"
                 />
               </div>
               <Button size="lg" className="rounded-full px-8">
