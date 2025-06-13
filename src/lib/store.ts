@@ -178,32 +178,6 @@ export const useClassStore = create<ClassState>()(
         
         console.log('📊 Raw classes data from database:', classesData?.length, 'classes');
         
-        // Get ALL confirmed bookings for ALL classes (no user filtering)
-        const { data: allConfirmedBookings, error: allBookingsError } = await supabase
-          .from('bookings')
-          .select('class_id, status')
-          .eq('status', 'confirmed');
-        
-        if (allBookingsError) {
-          console.error('Error fetching all bookings:', allBookingsError);
-        }
-        
-        console.log('📋 All confirmed bookings:', allConfirmedBookings?.length, 'bookings');
-        console.log('📋 Bookings data:', allConfirmedBookings);
-        
-        // Create a map of class_id to participant count
-        const participantCounts: Record<string, number> = {};
-        if (allConfirmedBookings) {
-          allConfirmedBookings.forEach(booking => {
-            if (!participantCounts[booking.class_id]) {
-              participantCounts[booking.class_id] = 0;
-            }
-            participantCounts[booking.class_id]++;
-          });
-        }
-        
-        console.log('🔢 Participant counts map:', participantCounts);
-        
         // Filter classes by region bounds before processing
         const filteredClassesData = classesData.filter(item => {
           if (!item.coordinates) return false;
@@ -220,6 +194,38 @@ export const useClassStore = create<ClassState>()(
         });
 
         console.log('🌍 Filtered classes by region:', filteredClassesData?.length, 'classes');
+        
+        // Extract class IDs for the filtered classes
+        const classIds = filteredClassesData.map(item => item.id);
+        console.log('🎯 Class IDs to fetch bookings for:', classIds);
+        
+        // Get confirmed bookings ONLY for the filtered classes
+        const { data: relevantBookings, error: bookingsError } = await supabase
+          .from('bookings')
+          .select('class_id, status')
+          .eq('status', 'confirmed')
+          .in('class_id', classIds);
+        
+        if (bookingsError) {
+          console.error('Error fetching relevant bookings:', bookingsError);
+        }
+        
+        console.log('📋 Relevant confirmed bookings:', relevantBookings?.length, 'bookings');
+        console.log('📋 Bookings data:', relevantBookings);
+        
+        // Create a map of class_id to participant count
+        const participantCounts: Record<string, number> = {};
+        if (relevantBookings) {
+          relevantBookings.forEach(booking => {
+            if (!participantCounts[booking.class_id]) {
+              participantCounts[booking.class_id] = 0;
+            }
+            participantCounts[booking.class_id]++;
+          });
+        }
+        
+        console.log('🔢 Participant counts map:', participantCounts);
+        
         // Get user-specific booking information (only for isBooked status)
         const user = useAuthStore.getState().user;
         let userBookings: any[] = [];
@@ -229,7 +235,8 @@ export const useClassStore = create<ClassState>()(
             .from('bookings')
             .select('class_id, status')
             .eq('user_id', user.id)
-            .eq('status', 'confirmed');
+            .eq('status', 'confirmed')
+            .in('class_id', classIds);
           
           if (userBookingsError) {
             console.error('Error fetching user bookings:', userBookingsError);
