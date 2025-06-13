@@ -193,8 +193,6 @@ export const useClassStore = create<ClassState>()(
         let participantCounts: Record<string, number> = {};
         
         if (classIds.length > 0) {
-          console.log('Querying bookings for class IDs:', classIds);
-          
           const { data: allBookings, error: bookingsError } = await supabase
             .from('bookings')
             .select('*')
@@ -204,54 +202,15 @@ export const useClassStore = create<ClassState>()(
           if (bookingsError) {
             console.error('Error fetching bookings:', bookingsError);
           } else {
-            console.log('Raw bookings data:', allBookings);
-            console.log('Number of bookings found:', allBookings?.length || 0);
-            
-            // Also try without status filter to see if there are any bookings at all
-            const { data: allBookingsNoFilter, error: noFilterError } = await supabase
-              .from('bookings')
-              .select('*')
-              .in('class_id', classIds);
-            
-            console.log('All bookings (no status filter):', allBookingsNoFilter);
-            
             // Count participants per class from bookings
             participantCounts = (allBookings || []).reduce((acc, booking) => {
               acc[booking.class_id] = (acc[booking.class_id] || 0) + 1;
               return acc;
             }, {} as Record<string, number>);
-            console.log('Calculated participant counts:', participantCounts);
           }
         }
         
-        // Also check if we can find any bookings at all in the database
-        const { data: anyBookings, error: anyBookingsError } = await supabase
-          .from('bookings')
-          .select('*')
-          .limit(5);
-        
-        if (anyBookingsError) {
-          console.error('Error checking for any bookings:', anyBookingsError);
-        } else {
-          console.log('Sample of all bookings in database:', anyBookings);
-        }
-        
-        // Check the actual table structure
-        const { data: tableInfo, error: tableError } = await supabase
-          .from('bookings')
-          .select('*')
-          .limit(1);
-        
-        if (tableError) {
-          console.error('Error checking table structure:', tableError);
-        } else {
-          console.log('Bookings table structure (first row):', tableInfo);
-        }
-        
-        // Let's also check what classes we found
-        console.log('Classes found:', filteredClassesData.length);
-        console.log('First class ID:', filteredClassesData[0]?.id);
-        
+        // Get user-specific booking information
         const user = useAuthStore.getState().user;
         let bookingsData: any[] = [];
         
@@ -280,8 +239,6 @@ export const useClassStore = create<ClassState>()(
           const booking = bookingsData.find(b => b.class_id === item.id);
           const isBooked = booking && booking.status !== 'cancelled';
           const actualParticipants = participantCounts[item.id] || 0;
-          
-          console.log(`Class ${item.title} (${item.id}): ${actualParticipants} participants`);
 
           return {
             id: item.id,
