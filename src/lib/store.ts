@@ -195,15 +195,17 @@ export const useClassStore = create<ClassState>()(
 
         console.log('🌍 Filtered classes by region:', filteredClassesData?.length, 'classes');
         
-        // Extract class IDs for the filtered classes
-        const classIds = filteredClassesData.map(item => item.id);
-        console.log('🎯 Class IDs to fetch bookings for:', classIds);
+        // Extract class IDs for ALL classes (not just filtered ones) to get accurate booking counts
+        const allClassIds = classesData.map(item => item.id);
+        const filteredClassIds = filteredClassesData.map(item => item.id);
+        console.log('🎯 All class IDs for booking count:', allClassIds.length);
+        console.log('🎯 Filtered class IDs for display:', filteredClassIds.length);
         
         // First, let's see ALL bookings for these classes (regardless of status)
         const { data: allBookingsForClasses, error: allBookingsError } = await supabase
           .from('bookings')
           .select('class_id, status, user_id, created_at')
-          .in('class_id', classIds);
+          .in('class_id', allClassIds);
         
         if (allBookingsError) {
           console.error('Error fetching all bookings:', allBookingsError);
@@ -212,12 +214,12 @@ export const useClassStore = create<ClassState>()(
           console.log('📋 All bookings breakdown:', allBookingsForClasses);
         }
         
-        // Get confirmed bookings ONLY for the filtered classes
+        // Get confirmed bookings for ALL classes to get accurate counts
         const { data: relevantBookings, error: bookingsError } = await supabase
           .from('bookings')
           .select('class_id, status')
           .eq('status', 'confirmed')
-          .in('class_id', classIds);
+          .in('class_id', allClassIds);
         
         if (bookingsError) {
           console.error('Error fetching relevant bookings:', bookingsError);
@@ -227,8 +229,8 @@ export const useClassStore = create<ClassState>()(
         console.log('📋 Bookings data:', relevantBookings);
         
         // Let's also directly query this specific class to see what's in the database
-        if (classIds.length > 0) {
-          const specificClassId = classIds[0]; // Check the first class
+        if (filteredClassIds.length > 0) {
+          const specificClassId = filteredClassIds[0]; // Check the first class
           const { data: directBookings, error: directError } = await supabase
             .from('bookings')
             .select('*')
@@ -265,7 +267,7 @@ export const useClassStore = create<ClassState>()(
             .select('class_id, status')
             .eq('user_id', user.id)
             .eq('status', 'confirmed')
-            .in('class_id', classIds);
+            .in('class_id', filteredClassIds); // Only check user bookings for visible classes
           
           if (userBookingsError) {
             console.error('Error fetching user bookings:', userBookingsError);
