@@ -135,6 +135,7 @@ export const useClassStore = create<ClassState>()(
           throw new Error('Region not properly configured');
         }
 
+        // First, get all classes with their current_participants from the database
         const { data: classesData, error: classesError } = await supabase
           .from('classes')
           .select(`
@@ -188,24 +189,6 @@ export const useClassStore = create<ClassState>()(
                  lon <= currentRegion.bounds.east;
         });
 
-        // Get ALL confirmed bookings to calculate accurate participant counts
-        const { data: allBookings, error: allBookingsError } = await supabase
-          .from('bookings')
-          .select('class_id, user_id, status')
-          .eq('status', 'confirmed');
-        
-        if (allBookingsError) {
-          console.error('Error fetching all bookings:', allBookingsError);
-        }
-        
-        // Count participants per class from all confirmed bookings
-        const participantCounts: Record<string, number> = {};
-        if (allBookings) {
-          allBookings.forEach(booking => {
-            participantCounts[booking.class_id] = (participantCounts[booking.class_id] || 0) + 1;
-          });
-        }
-        
         // Get user-specific booking information
         const user = useAuthStore.getState().user;
         let userBookings: any[] = [];
@@ -240,8 +223,9 @@ export const useClassStore = create<ClassState>()(
           const userBooking = userBookings.find(b => b.class_id === item.id);
           const isBooked = !!userBooking;
           
-          // Get actual participant count from global bookings
-          const actualParticipants = participantCounts[item.id] || 0;
+          // Use the current_participants from the database directly
+          // This is maintained by database triggers and is always accurate
+          const actualParticipants = item.current_participants || 0;
 
           return {
             id: item.id,
