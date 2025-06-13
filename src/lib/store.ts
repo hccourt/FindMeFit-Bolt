@@ -10,6 +10,7 @@ interface ClassState {
   isLoading: boolean;
   createClass: (classData: CreateClassRpcPayload) => Promise<void>;
   fetchClasses: () => Promise<void>;
+  forceRefreshClasses: () => Promise<void>;
   searchVenues: (query: string) => Promise<Venue[]>;
   findVenueByDetails: (name: string, postalCode: string, city: string) => Promise<Venue | null>;
   createVenue: (venueData: Omit<Venue, 'id' | 'verified' | 'verified_at' | 'verified_by'>) => Promise<Venue>;
@@ -136,7 +137,7 @@ export const useClassStore = create<ClassState>()(
           throw new Error('Region not properly configured');
         }
 
-        // Get all classes with real-time participant counts from bookings
+        // Get all classes with real-time participant counts from bookings (force fresh data)
         const { data: classesData, error: classesError } = await supabase
           .from('classes')
           .select(`
@@ -170,16 +171,18 @@ export const useClassStore = create<ClassState>()(
               review_count,
               experience
             )
-          `);
+          `)
+          .order('created_at', { ascending: false });
         
         if (classesError) throw classesError;
         console.log('📚 Classes fetched:', classesData?.length || 0);
         
-        // Get ALL confirmed bookings to calculate participant counts
+        // Get ALL confirmed bookings to calculate participant counts (force fresh data)
         const { data: allBookings, error: allBookingsError } = await supabase
           .from('bookings')
           .select('class_id, user_id')
-          .eq('status', 'confirmed');
+          .eq('status', 'confirmed')
+          .order('created_at', { ascending: false });
         
         if (allBookingsError) throw allBookingsError;
         console.log('📋 All confirmed bookings:', allBookings?.length || 0, allBookings);
@@ -217,7 +220,8 @@ export const useClassStore = create<ClassState>()(
             .from('bookings')
             .select('class_id, status')
             .eq('user_id', user.id)
-            .eq('status', 'confirmed');
+            .eq('status', 'confirmed')
+            .order('created_at', { ascending: false });
           
           if (userBookingsError) {
             console.error('Error fetching user bookings:', userBookingsError);
@@ -310,6 +314,18 @@ export const useClassStore = create<ClassState>()(
       }
     },
     
+    forceRefreshClasses: async () => {
+      console.log('🔄 Force refreshing classes...');
+      // Clear any cached data
+      set({ classes: [], isLoading: true });
+      
+      // Add a small delay to ensure any pending operations complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Fetch fresh data
+      await get().fetchClasses();
+    },
+    
     fetchBookings: async (userId: string) => {
       set({ isLoading: true });
       try {
@@ -397,7 +413,7 @@ export const useClassStore = create<ClassState>()(
         
         // Refresh classes to get updated participant counts
         console.log('🔄 Refreshing classes after booking...');
-        await get().fetchClasses();
+        await get().forceRefreshClasses();
         
         return newBooking;
       } catch (error) {
@@ -425,7 +441,7 @@ export const useClassStore = create<ClassState>()(
         }));
         
         // Refresh classes to get updated participant counts
-        await get().fetchClasses();
+        await get().forceRefreshClasses();
       } catch (error) {
         console.error('Error cancelling booking:', error);
         set({ isLoading: false });

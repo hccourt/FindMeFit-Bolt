@@ -17,7 +17,7 @@ export const ClassDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuthStore();
-  const { classes, isLoading, fetchClasses, bookClass } = useClassStore();
+  const { classes, isLoading, fetchClasses, forceRefreshClasses, bookClass } = useClassStore();
   const { currentRegion } = useRegionStore();
   
   const [classItem, setClassItem] = useState<Class | null>(null);
@@ -26,8 +26,8 @@ export const ClassDetailPage: React.FC = () => {
   const [showChat, setShowChat] = useState(false);
   
   useEffect(() => {
-    fetchClasses();
-  }, [fetchClasses]);
+    forceRefreshClasses();
+  }, [forceRefreshClasses]);
   
   useEffect(() => {
     if (classes.length > 0 && id) {
@@ -52,8 +52,8 @@ export const ClassDetailPage: React.FC = () => {
       
       await bookClass(classItem.id, user.id);
       
-      // Refresh classes to get updated participant count and booking status
-      await fetchClasses();
+      // Force refresh to get updated participant count and booking status
+      await forceRefreshClasses();
       
       setBookingSuccess(true);
     } catch (error) {
