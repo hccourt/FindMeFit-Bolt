@@ -130,6 +130,8 @@ export const useClassStore = create<ClassState>()(
     fetchClasses: async () => {
       set({ isLoading: true });
       try {
+        console.log('🔍 fetchClasses called from useClassStore');
+        
         const { currentRegion } = useRegionStore.getState();
         if (!currentRegion || !currentRegion.bounds) {
           throw new Error('Region not properly configured');
@@ -174,6 +176,8 @@ export const useClassStore = create<ClassState>()(
         
         if (classesError) throw classesError;
         
+        console.log('📊 Raw classes data from database:', classesData?.length, 'classes');
+        
         // Get ALL confirmed bookings for ALL classes (no user filtering)
         const { data: allConfirmedBookings, error: allBookingsError } = await supabase
           .from('bookings')
@@ -183,6 +187,9 @@ export const useClassStore = create<ClassState>()(
         if (allBookingsError) {
           console.error('Error fetching all bookings:', allBookingsError);
         }
+        
+        console.log('📋 All confirmed bookings:', allConfirmedBookings?.length, 'bookings');
+        console.log('📋 Bookings data:', allConfirmedBookings);
         
         // Create a map of class_id to participant count
         const participantCounts: Record<string, number> = {};
@@ -194,6 +201,8 @@ export const useClassStore = create<ClassState>()(
             participantCounts[booking.class_id]++;
           });
         }
+        
+        console.log('🔢 Participant counts map:', participantCounts);
         
         // Filter classes by region bounds before processing
         const filteredClassesData = classesData.filter(item => {
@@ -210,6 +219,7 @@ export const useClassStore = create<ClassState>()(
                  lon <= currentRegion.bounds.east;
         });
 
+        console.log('🌍 Filtered classes by region:', filteredClassesData?.length, 'classes');
         // Get user-specific booking information (only for isBooked status)
         const user = useAuthStore.getState().user;
         let userBookings: any[] = [];
@@ -227,6 +237,8 @@ export const useClassStore = create<ClassState>()(
             userBookings = userBookingsData || [];
           }
         }
+        
+        console.log('👤 User bookings:', userBookings?.length, 'bookings for user:', user?.name);
         
         const transformedData = filteredClassesData.map(item => {
           let coordinates = null;
@@ -247,6 +259,12 @@ export const useClassStore = create<ClassState>()(
           // Get the real participant count from ALL confirmed bookings
           const actualParticipants = participantCounts[item.id] || 0;
 
+          console.log(`📝 Class "${item.title}" (${item.id}):`, {
+            dbParticipants: item.current_participants,
+            actualParticipants,
+            maxParticipants: item.max_participants,
+            isBooked
+          });
           return {
             id: item.id,
             title: item.title,
@@ -285,6 +303,11 @@ export const useClassStore = create<ClassState>()(
             updated_at: item.updated_at,
             isBooked
           };
+        });
+        
+        console.log('✅ Final transformed data:', transformedData.length, 'classes');
+        transformedData.forEach(cls => {
+          console.log(`  - ${cls.title}: ${cls.currentParticipants}/${cls.maxParticipants} participants`);
         });
         
         set({ classes: transformedData, isLoading: false });
