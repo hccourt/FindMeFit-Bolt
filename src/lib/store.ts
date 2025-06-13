@@ -188,6 +188,21 @@ export const useClassStore = create<ClassState>()(
                  lon <= currentRegion.bounds.east;
         });
 
+        // Get all confirmed bookings for these classes
+        const classIds = filteredClassesData.map(c => c.id);
+        const { data: allBookings, error: bookingsError } = await supabase
+          .from('bookings')
+          .select('class_id, user_id, status')
+          .in('class_id', classIds)
+          .eq('status', 'confirmed');
+        
+        if (bookingsError) throw bookingsError;
+        
+        // Count participants per class from bookings
+        const participantCounts = (allBookings || []).reduce((acc, booking) => {
+          acc[booking.class_id] = (acc[booking.class_id] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
         const user = useAuthStore.getState().user;
         let bookingsData: any[] = [];
         
@@ -215,6 +230,7 @@ export const useClassStore = create<ClassState>()(
 
           const booking = bookingsData.find(b => b.class_id === item.id);
           const isBooked = booking && booking.status !== 'cancelled';
+          const actualParticipants = participantCounts[item.id] || 0;
 
           return {
             id: item.id,
@@ -245,7 +261,7 @@ export const useClassStore = create<ClassState>()(
             endTime: item.end_time,
             price: item.price,
             maxParticipants: item.max_participants,
-            currentParticipants: item.current_participants,
+            currentParticipants: actualParticipants,
             type: item.type,
             level: item.level,
             tags: item.tags,
@@ -291,7 +307,18 @@ export const useClassStore = create<ClassState>()(
         
         if (classError) throw classError;
         
-        if (!classData || classData.current_participants >= classData.max_participants) {
+        // Get actual participant count from bookings
+        const { data: bookings, error: bookingsError } = await supabase
+          .from('bookings')
+          .select('id')
+          .eq('class_id', classId)
+          .eq('status', 'confirmed');
+        
+        if (bookingsError) throw bookingsError;
+        
+        const actualParticipants = bookings?.length || 0;
+        
+        if (!classData || actualParticipants >= classData.max_participants) {
           throw new Error('Class is full');
         }
         
@@ -324,13 +351,6 @@ export const useClassStore = create<ClassState>()(
           bookings: [...state.bookings, newBooking as Booking],
           isLoading: false
         }));
-        
-        const { error: updateError } = await supabase
-          .from('classes')
-          .update({ current_participants: classData.current_participants + 1 })
-          .eq('id', classId);
-        
-        if (updateError) throw updateError;
         
         set(state => ({
           classes: state.classes.map(c => {
@@ -783,7 +803,18 @@ export const useStore = create<StoreState>((set) => ({
       
       if (classError) throw classError;
       
-      if (!classData || classData.current_participants >= classData.max_participants) {
+      // Get actual participant count from bookings
+      const { data: bookings, error: bookingsError } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('class_id', classId)
+        .eq('status', 'confirmed');
+      
+      if (bookingsError) throw bookingsError;
+      
+      const actualParticipants = bookings?.length || 0;
+      
+      if (!classData || actualParticipants >= classData.max_participants) {
         throw new Error('Class is full');
       }
       
@@ -817,13 +848,6 @@ export const useStore = create<StoreState>((set) => ({
         bookings: [...state.bookings, data as Booking],
         isLoading: false
       }));
-      
-      const { error: updateError } = await supabase
-        .from('classes')
-        .update({ current_participants: classData.current_participants + 1 })
-        .eq('id', classId);
-      
-      if (updateError) throw updateError;
       
       set(state => ({
         classes: state.classes.map(c => {
