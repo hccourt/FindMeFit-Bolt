@@ -130,14 +130,11 @@ export const useClassStore = create<ClassState>()(
     fetchClasses: async () => {
       set({ isLoading: true });
       try {
-        console.log('🔍 fetchClasses called from useClassStore');
-        
         const { currentRegion } = useRegionStore.getState();
         if (!currentRegion || !currentRegion.bounds) {
           throw new Error('Region not properly configured');
         }
 
-        // Get all classes from the database
         const { data: classesData, error: classesError } = await supabase
           .from('classes')
           .select(`
@@ -176,8 +173,6 @@ export const useClassStore = create<ClassState>()(
         
         if (classesError) throw classesError;
         
-        console.log('📊 Raw classes data from database:', classesData?.length, 'classes');
-        
         // Filter classes by region bounds before processing
         const filteredClassesData = classesData.filter(item => {
           if (!item.coordinates) return false;
@@ -193,90 +188,18 @@ export const useClassStore = create<ClassState>()(
                  lon <= currentRegion.bounds.east;
         });
 
-        console.log('🌍 Filtered classes by region:', filteredClassesData?.length, 'classes');
-        
-        // Extract class IDs for ALL classes (not just filtered ones) to get accurate booking counts
-        const allClassIds = classesData.map(item => item.id);
-        const filteredClassIds = filteredClassesData.map(item => item.id);
-        console.log('🎯 All class IDs for booking count:', allClassIds.length);
-        console.log('🎯 Filtered class IDs for display:', filteredClassIds.length);
-        
-        // First, let's see ALL bookings for these classes (regardless of status)
-        const { data: allBookingsForClasses, error: allBookingsError } = await supabase
-          .from('bookings')
-          .select('class_id, status, user_id, created_at')
-          .in('class_id', allClassIds);
-        
-        if (allBookingsError) {
-          console.error('Error fetching all bookings:', allBookingsError);
-        } else {
-          console.log('📋 ALL bookings for these classes (any status):', allBookingsForClasses?.length, 'bookings');
-          console.log('📋 All bookings breakdown:', allBookingsForClasses);
-        }
-        
-        // Get confirmed bookings for ALL classes to get accurate counts
-        const { data: relevantBookings, error: bookingsError } = await supabase
-          .from('bookings')
-          .select('class_id, status')
-          .eq('status', 'confirmed')
-          .in('class_id', allClassIds);
-        
-        if (bookingsError) {
-          console.error('Error fetching relevant bookings:', bookingsError);
-        }
-        
-        console.log('📋 Relevant confirmed bookings:', relevantBookings?.length, 'bookings');
-        console.log('📋 Bookings data:', relevantBookings);
-        
-        // Let's also directly query this specific class to see what's in the database
-        if (filteredClassIds.length > 0) {
-          const specificClassId = filteredClassIds[0]; // Check the first class
-          const { data: directBookings, error: directError } = await supabase
-            .from('bookings')
-            .select('*')
-            .eq('class_id', specificClassId);
-          
-          if (directError) {
-            console.error('Error in direct booking query:', directError);
-          } else {
-            console.log(`🔍 DIRECT query for class ${specificClassId}:`, directBookings?.length, 'total bookings');
-            console.log('🔍 Direct booking details:', directBookings);
-          }
-        }
-        
-        // Create a map of class_id to participant count
-        const participantCounts: Record<string, number> = {};
-        if (relevantBookings) {
-          relevantBookings.forEach(booking => {
-            if (!participantCounts[booking.class_id]) {
-              participantCounts[booking.class_id] = 0;
-            }
-            participantCounts[booking.class_id]++;
-          });
-        }
-        
-        console.log('🔢 Participant counts map:', participantCounts);
-        
-        // Get user-specific booking information (only for isBooked status)
         const user = useAuthStore.getState().user;
-        let userBookings: any[] = [];
+        let bookingsData: any[] = [];
         
         if (user) {
-          const { data: userBookingsData, error: userBookingsError } = await supabase
+          const { data: userBookings, error: bookingsError } = await supabase
             .from('bookings')
-            .select('class_id, status')
-            .eq('user_id', user.id)
-            .eq('status', 'confirmed')
-            .in('class_id', filteredClassIds); // Only check user bookings for visible classes
+            .select('*')
+            .eq('user_id', user.id);
           
-          if (userBookingsError) {
-            console.error('Error fetching user bookings:', userBookingsError);
-          } else {
-            userBookings = userBookingsData || [];
-          }
+          if (bookingsError) throw bookingsError;
+          bookingsData = userBookings || [];
         }
-        
-        console.log('👤 User bookings:', userBookings?.length, 'bookings for user:', user?.name);
         
         const transformedData = filteredClassesData.map(item => {
           let coordinates = null;
@@ -290,19 +213,9 @@ export const useClassStore = create<ClassState>()(
             }
           }
 
-          // Check if current user has booked this class (for isBooked flag only)
-          const userBooking = userBookings.find(b => b.class_id === item.id);
-          const isBooked = !!userBooking;
-          
-          // Get the real participant count from ALL confirmed bookings
-          const actualParticipants = participantCounts[item.id] || 0;
+          const booking = bookingsData.find(b => b.class_id === item.id);
+          const isBooked = booking && booking.status !== 'cancelled';
 
-          console.log(`📝 Class "${item.title}" (${item.id}):`, {
-            dbParticipants: item.current_participants,
-            actualParticipants,
-            maxParticipants: item.max_participants,
-            isBooked
-          });
           return {
             id: item.id,
             title: item.title,
@@ -332,7 +245,7 @@ export const useClassStore = create<ClassState>()(
             endTime: item.end_time,
             price: item.price,
             maxParticipants: item.max_participants,
-            currentParticipants: actualParticipants,
+            currentParticipants: item.current_participants,
             type: item.type,
             level: item.level,
             tags: item.tags,
@@ -341,11 +254,6 @@ export const useClassStore = create<ClassState>()(
             updated_at: item.updated_at,
             isBooked
           };
-        });
-        
-        console.log('✅ Final transformed data:', transformedData.length, 'classes');
-        transformedData.forEach(cls => {
-          console.log(`  - ${cls.title}: ${cls.currentParticipants}/${cls.maxParticipants} participants`);
         });
         
         set({ classes: transformedData, isLoading: false });
@@ -383,18 +291,7 @@ export const useClassStore = create<ClassState>()(
         
         if (classError) throw classError;
         
-        // Get actual participant count from bookings
-        const { data: bookings, error: bookingsError } = await supabase
-          .from('bookings')
-          .select('id')
-          .eq('class_id', classId)
-          .eq('status', 'confirmed');
-        
-        if (bookingsError) throw bookingsError;
-        
-        const actualParticipants = bookings?.length || 0;
-        
-        if (!classData || actualParticipants >= classData.max_participants) {
+        if (!classData || classData.current_participants >= classData.max_participants) {
           throw new Error('Class is full');
         }
         
@@ -427,6 +324,13 @@ export const useClassStore = create<ClassState>()(
           bookings: [...state.bookings, newBooking as Booking],
           isLoading: false
         }));
+        
+        const { error: updateError } = await supabase
+          .from('classes')
+          .update({ current_participants: classData.current_participants + 1 })
+          .eq('id', classId);
+        
+        if (updateError) throw updateError;
         
         set(state => ({
           classes: state.classes.map(c => {
@@ -879,18 +783,7 @@ export const useStore = create<StoreState>((set) => ({
       
       if (classError) throw classError;
       
-      // Get actual participant count from bookings
-      const { data: bookings, error: bookingsError } = await supabase
-        .from('bookings')
-        .select('id')
-        .eq('class_id', classId)
-        .eq('status', 'confirmed');
-      
-      if (bookingsError) throw bookingsError;
-      
-      const actualParticipants = bookings?.length || 0;
-      
-      if (!classData || actualParticipants >= classData.max_participants) {
+      if (!classData || classData.current_participants >= classData.max_participants) {
         throw new Error('Class is full');
       }
       
@@ -924,6 +817,13 @@ export const useStore = create<StoreState>((set) => ({
         bookings: [...state.bookings, data as Booking],
         isLoading: false
       }));
+      
+      const { error: updateError } = await supabase
+        .from('classes')
+        .update({ current_participants: classData.current_participants + 1 })
+        .eq('id', classId);
+      
+      if (updateError) throw updateError;
       
       set(state => ({
         classes: state.classes.map(c => {
