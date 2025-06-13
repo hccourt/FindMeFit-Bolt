@@ -6,13 +6,14 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Filter, Search, X } from 'lucide-react';
-import { useClassStore, useRegionStore } from '../lib/store';
+import { useClassStore, useRegionStore, useLocationStore } from '../lib/store';
 import { Class } from '../lib/types';
 import { isCoordinateInRegion } from '../lib/utils';
 
 export const DiscoverPage: React.FC = () => {
   const { classes, fetchClasses, isLoading } = useClassStore();
   const { currentRegion } = useRegionStore();
+  const { currentLocation } = useLocationStore();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -132,48 +133,69 @@ export const DiscoverPage: React.FC = () => {
         <Container>
           <div className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-              Discover Fitness Classes in {currentRegion.name}
+              {currentLocation 
+                ? `Discover Fitness Classes in ${currentLocation.name}` 
+                : 'Discover Fitness Classes'
+              }
             </h1>
             <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-              Find the perfect workout session that matches your preferences and schedule
+              {currentLocation 
+                ? 'Find the perfect workout session that matches your preferences and schedule'
+                : 'Set your location to find fitness classes and trainers in your area'
+              }
             </p>
           </div>
           
-          <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search classes, instructors, or locations"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                leftIcon={<Search size={18} />}
-                rightIcon={
-                  searchTerm ? (
-                    <button
-                      onClick={() => setSearchTerm('')}
-                      className="text-neutral-500 hover:text-neutral-700"
-                    >
-                      <X size={16} />
-                    </button>
-                  ) : undefined
-                }
-              />
+          {currentLocation ? (
+            <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+              <div className="flex-1">
+                <Input
+                  placeholder="Search classes, instructors, or locations"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  leftIcon={<Search size={18} />}
+                  rightIcon={
+                    searchTerm ? (
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="text-neutral-500 hover:text-neutral-700"
+                      >
+                        <X size={16} />
+                      </button>
+                    ) : undefined
+                  }
+                />
+              </div>
+              <Button
+                variant="outline"
+                leftIcon={<Filter size={18} />}
+                onClick={() => setShowFilters(!showFilters)}
+                className="md:w-auto"
+              >
+                Filters
+                {hasActiveFilters() && (
+                  <span className="ml-2 bg-primary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {filters.type.length + filters.level.length + (filters.price.min > 0 || filters.price.max < 100 ? 1 : 0)}
+                  </span>
+                )}
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              leftIcon={<Filter size={18} />}
-              onClick={() => setShowFilters(!showFilters)}
-              className="md:w-auto"
-            >
-              Filters
-              {hasActiveFilters() && (
-                <span className="ml-2 bg-primary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {filters.type.length + filters.level.length + (filters.price.min > 0 || filters.price.max < 100 ? 1 : 0)}
-                </span>
-              )}
-            </Button>
-          </div>
+          ) : (
+            <div className="text-center py-8 bg-white rounded-xl shadow-soft">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-600 mb-4">
+                <Search className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">Set Your Location First</h3>
+              <p className="text-neutral-600 mb-4">
+                Please select your location using the location picker in the navigation to discover classes in your area.
+              </p>
+              <p className="text-sm text-neutral-500">
+                Click on the location selector in the top navigation bar to get started.
+              </p>
+            </div>
+          )}
           
-          {showFilters && (
+          {currentLocation && showFilters && (
             <div className="mt-4 p-4 bg-white rounded-lg shadow-soft">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Filters</h3>
@@ -327,7 +349,7 @@ export const DiscoverPage: React.FC = () => {
             </div>
           )}
           
-          {hasActiveFilters() && (
+          {currentLocation && hasActiveFilters() && (
             <div className="mt-4 flex flex-wrap gap-2">
               {searchTerm && (
                 <Badge variant="primary\" size="md\" className="flex items-center gap-1">
@@ -382,7 +404,17 @@ export const DiscoverPage: React.FC = () => {
       </div>
       
       <Container className="py-12">
-        {isLoading ? (
+        {!currentLocation ? (
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 text-primary-600 mb-6">
+              <Search className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-semibold text-neutral-700 mb-4">Location Required</h3>
+            <p className="text-neutral-500 max-w-md mx-auto">
+              To discover fitness classes and trainers, please set your location using the location picker in the navigation bar above.
+            </p>
+          </div>
+        ) : isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array(6)
               .fill(0)

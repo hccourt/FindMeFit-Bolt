@@ -6,12 +6,13 @@ import { Container } from '../components/ui/Container';
 import { Button } from '../components/ui/Button';
 import { ClassCard } from '../components/features/ClassCard';
 import { Hero } from '../components/features/Hero';
-import { useClassStore, useRegionStore } from '../lib/store';
+import { useClassStore, useRegionStore, useLocationStore } from '../lib/store';
 import { isCoordinateInRegion } from '../lib/utils';
 
 export const HomePage: React.FC = () => {
   const { classes, fetchClasses, isLoading } = useClassStore();
   const { currentRegion } = useRegionStore();
+  const { currentLocation } = useLocationStore();
   
   useEffect(() => {
     fetchClasses();
@@ -41,8 +42,15 @@ export const HomePage: React.FC = () => {
         <Container>
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-neutral-900">Featured Classes in {currentRegion.name}</h2>
-              <p className="mt-2 text-neutral-600">Discover our most popular fitness experiences</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-neutral-900">
+                {currentLocation ? `Featured Classes in ${currentLocation.name}` : 'Featured Classes'}
+              </h2>
+              <p className="mt-2 text-neutral-600">
+                {currentLocation 
+                  ? 'Discover our most popular fitness experiences' 
+                  : 'Set your location to discover fitness classes near you'
+                }
+              </p>
             </div>
             <Link to="/discover">
               <Button variant="outline" rightIcon={<ArrowRight size={16} />}>
@@ -51,7 +59,20 @@ export const HomePage: React.FC = () => {
             </Link>
           </div>
           
-          {isLoading ? (
+          {!currentLocation ? (
+            <div className="text-center py-12 bg-neutral-50 rounded-xl">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-600 mb-4">
+                <ArrowRight className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">Set Your Location</h3>
+              <p className="text-neutral-600 mb-6">
+                Choose your location to discover fitness classes and trainers in your area.
+              </p>
+              <p className="text-sm text-neutral-500">
+                Use the location picker in the top navigation to get started.
+              </p>
+            </div>
+          ) : isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array(3)
                 .fill(0)
@@ -75,7 +96,7 @@ export const HomePage: React.FC = () => {
               </div>
               <h3 className="text-lg font-medium mb-2">No Classes Available</h3>
               <p className="text-neutral-600 mb-6">
-                There are currently no featured classes in {currentRegion.name}.
+                There are currently no featured classes in {currentLocation.name}.
               </p>
               <Link to="/discover">
                 <Button>Browse All Classes</Button>
