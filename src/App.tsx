@@ -36,6 +36,7 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
+      <div style={{ minHeight: '100vh' }}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -46,6 +47,7 @@ function App() {
         <Route path="/instructor" element={<InstructorDashboard />} />
         <Route path="/profile/:id" element={<EditProfilePage />} />
       </Routes>
+      </div>
     </Router>
   );
 }

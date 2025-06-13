@@ -5,9 +5,13 @@ export function useScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
+    // Use requestAnimationFrame to ensure the scroll happens after the route change
+    requestAnimationFrame(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
     });
   }, [pathname]);
 }
