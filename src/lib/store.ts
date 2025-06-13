@@ -190,19 +190,28 @@ export const useClassStore = create<ClassState>()(
 
         // Get all confirmed bookings for these classes
         const classIds = filteredClassesData.map(c => c.id);
-        const { data: allBookings, error: bookingsError } = await supabase
-          .from('bookings')
-          .select('class_id, user_id, status')
-          .in('class_id', classIds)
-          .eq('status', 'confirmed');
+        let participantCounts: Record<string, number> = {};
         
-        if (bookingsError) throw bookingsError;
+        if (classIds.length > 0) {
+          const { data: allBookings, error: bookingsError } = await supabase
+            .from('bookings')
+            .select('class_id, user_id, status')
+            .in('class_id', classIds)
+            .eq('status', 'confirmed');
+          
+          if (bookingsError) {
+            console.error('Error fetching bookings:', bookingsError);
+          } else {
+            console.log('All bookings for classes:', allBookings);
+            // Count participants per class from bookings
+            participantCounts = (allBookings || []).reduce((acc, booking) => {
+              acc[booking.class_id] = (acc[booking.class_id] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+            console.log('Participant counts:', participantCounts);
+          }
+        }
         
-        // Count participants per class from bookings
-        const participantCounts = (allBookings || []).reduce((acc, booking) => {
-          acc[booking.class_id] = (acc[booking.class_id] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
         const user = useAuthStore.getState().user;
         let bookingsData: any[] = [];
         
@@ -231,6 +240,8 @@ export const useClassStore = create<ClassState>()(
           const booking = bookingsData.find(b => b.class_id === item.id);
           const isBooked = booking && booking.status !== 'cancelled';
           const actualParticipants = participantCounts[item.id] || 0;
+          
+          console.log(`Class ${item.title} (${item.id}): ${actualParticipants} participants`);
 
           return {
             id: item.id,
