@@ -174,10 +174,10 @@ export const useClassStore = create<ClassState>()(
         
         if (classesError) throw classesError;
         
-        // Get ALL confirmed bookings for ALL classes to calculate real participant counts
-        const { data: allBookings, error: allBookingsError } = await supabase
+        // Get ALL confirmed bookings for ALL classes (no user filtering)
+        const { data: allConfirmedBookings, error: allBookingsError } = await supabase
           .from('bookings')
-          .select('class_id, user_id, status')
+          .select('class_id, status')
           .eq('status', 'confirmed');
         
         if (allBookingsError) {
@@ -186,8 +186,8 @@ export const useClassStore = create<ClassState>()(
         
         // Create a map of class_id to participant count
         const participantCounts: Record<string, number> = {};
-        if (allBookings) {
-          allBookings.forEach(booking => {
+        if (allConfirmedBookings) {
+          allConfirmedBookings.forEach(booking => {
             if (!participantCounts[booking.class_id]) {
               participantCounts[booking.class_id] = 0;
             }
@@ -210,7 +210,7 @@ export const useClassStore = create<ClassState>()(
                  lon <= currentRegion.bounds.east;
         });
 
-        // Get user-specific booking information
+        // Get user-specific booking information (only for isBooked status)
         const user = useAuthStore.getState().user;
         let userBookings: any[] = [];
         
@@ -240,11 +240,11 @@ export const useClassStore = create<ClassState>()(
             }
           }
 
-          // Check if current user has booked this class
+          // Check if current user has booked this class (for isBooked flag only)
           const userBooking = userBookings.find(b => b.class_id === item.id);
           const isBooked = !!userBooking;
           
-          // Get the real participant count from our bookings data
+          // Get the real participant count from ALL confirmed bookings
           const actualParticipants = participantCounts[item.id] || 0;
 
           return {
