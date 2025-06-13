@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { Container } from '../components/ui/Container';
 import { ClassCard } from '../components/features/ClassCard';
@@ -14,6 +15,7 @@ export const DiscoverPage: React.FC = () => {
   const { classes, fetchClasses, isLoading } = useClassStore();
   const { currentRegion } = useRegionStore();
   const { currentLocation } = useLocationStore();
+  const location = useLocation();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -26,6 +28,14 @@ export const DiscoverPage: React.FC = () => {
   });
   const [filteredClasses, setFilteredClasses] = useState<Class[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Scroll to top when component mounts or location changes
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [location.pathname]);
   
   useEffect(() => {
     fetchClasses();
