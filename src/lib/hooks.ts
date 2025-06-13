@@ -1,30 +1,41 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
+// Smooth animated scroll to top function
+function animatedScrollToTop(duration: number = 600) {
+  const startPosition = window.pageYOffset;
+  const startTime = performance.now();
+  
+  function easeInOutCubic(t: number): number {
+    return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+  }
+  
+  function animateScroll(currentTime: number) {
+    const timeElapsed = currentTime - startTime;
+    const progress = Math.min(timeElapsed / duration, 1);
+    const easedProgress = easeInOutCubic(progress);
+    
+    const currentPosition = startPosition * (1 - easedProgress);
+    window.scrollTo(0, currentPosition);
+    
+    if (progress < 1) {
+      requestAnimationFrame(animateScroll);
+    }
+  }
+  
+  requestAnimationFrame(animateScroll);
+}
+
 export function useScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Use multiple requestAnimationFrame calls to ensure DOM is fully rendered
-    // and then use instant scroll to guarantee we reach the top
-    const scrollToTop = () => {
+    // Wait for DOM to be fully rendered before scrolling
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          // First try instant scroll to ensure we get to the top
-          window.scrollTo(0, 0);
-          
-          // Then add a small delay and do a smooth scroll for better UX
-          setTimeout(() => {
-            window.scrollTo({
-              top: 0,
-              left: 0,
-              behavior: 'smooth'
-            });
-          }, 10);
-        });
+        // Use our custom animated scroll for better control and consistency
+        animatedScrollToTop(500);
       });
-    };
-    
-    scrollToTop();
+    });
   }, [pathname]);
 }
