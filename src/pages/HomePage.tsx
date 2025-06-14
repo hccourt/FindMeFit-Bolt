@@ -107,32 +107,32 @@ export const HomePage: React.FC = () => {
       </section>
       
       {/* How It Works Section */}
-      <section className="py-16 bg-neutral-50">
+      <section className="py-16 bg-muted">
         <Container>
           <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-neutral-900">How FindMeFit Works</h2>
-            <p className="mt-2 text-neutral-600 max-w-2xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground">How FindMeFit Works</h2>
+            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
               We make it easy to find and book fitness sessions with top instructors in your area
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-primary-100 text-primary-600 mb-4">
+              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M17.5 21h-10a3.5 3.5 0 0 1 0-7h.5"></path>
                   <path d="M9.5 4h10a3.5 3.5 0 0 1 0 7h-.5"></path>
                   <path d="M3 3v18"></path>
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Connect</h3>
-              <p className="text-neutral-600">
+              <h3 className="text-lg font-semibold mb-2 text-foreground">Connect</h3>
+              <p className="text-muted-foreground">
                 Create your profile and connect with certified fitness instructors that match your preferences
               </p>
             </div>
             
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-primary-100 text-primary-600 mb-4">
+              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"></circle>
                   <line x1="22" y1="12" x2="18" y2="12"></line>
@@ -141,14 +141,14 @@ export const HomePage: React.FC = () => {
                   <line x1="12" y1="22" x2="12" y2="18"></line>
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Book</h3>
-              <p className="text-neutral-600">
+              <h3 className="text-lg font-semibold mb-2 text-foreground">Book</h3>
+              <p className="text-muted-foreground">
                 Browse and book group classes or personal training sessions with just a few clicks
               </p>
             </div>
             
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-primary-100 text-primary-600 mb-4">
+              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m18 14 1.09-1.09a2 2 0 0 0 0-2.82L13.4 4.4a2 2 0 0 0-2.82 0L9.5 5.5"></path>
                   <path d="M5.5 9.5 4.4 10.6a2 2 0 0 0 0 2.82L10.1 19.1a2 2 0 0 0 2.82 0l1.09-1.09"></path>
@@ -157,8 +157,8 @@ export const HomePage: React.FC = () => {
                   <line x1="16" y1="8" x2="18" y2="10"></line>
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Achieve</h3>
-              <p className="text-neutral-600">
+              <h3 className="text-lg font-semibold mb-2 text-foreground">Achieve</h3>
+              <p className="text-muted-foreground">
                 Track your progress, attend sessions, and reach your fitness goals with professional guidance
               </p>
             </div>
@@ -167,17 +167,17 @@ export const HomePage: React.FC = () => {
       </section>
       
       {/* Testimonials Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-background">
         <Container>
           <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-neutral-900">What Our Users Say</h2>
-            <p className="mt-2 text-neutral-600 max-w-2xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground">What Our Users Say</h2>
+            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
               Read testimonials from clients and instructors who've found success with FindMeFit
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-neutral-50 p-6 rounded-xl">
+            <div className="bg-card border border-border/50 p-6 rounded-xl">
               <div className="flex items-center mb-4">
                 <img
                   src="https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg?auto=compress&cs=tinysrgb&w=600"
@@ -185,17 +185,17 @@ export const HomePage: React.FC = () => {
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 <div className="ml-3">
-                  <p className="font-medium">Jennifer L.</p>
-                  <p className="text-sm text-neutral-500">Client</p>
+                  <p className="font-medium text-card-foreground">Jennifer L.</p>
+                  <p className="text-sm text-muted-foreground">Client</p>
                 </div>
               </div>
               <div className="text-yellow-400 mb-3">★★★★★</div>
-              <p className="text-neutral-600">
+              <p className="text-muted-foreground">
                 "FindMeFit made it incredibly easy to find a personal trainer who understood my goals. I've been working with Sarah for 3 months, and I've never felt stronger!"
               </p>
             </div>
             
-            <div className="bg-neutral-50 p-6 rounded-xl">
+            <div className="bg-card border border-border/50 p-6 rounded-xl">
               <div className="flex items-center mb-4">
                 <img
                   src="https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=600"
@@ -203,17 +203,17 @@ export const HomePage: React.FC = () => {
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 <div className="ml-3">
-                  <p className="font-medium">Michael R.</p>
-                  <p className="text-sm text-neutral-500">Instructor</p>
+                  <p className="font-medium text-card-foreground">Michael R.</p>
+                  <p className="text-sm text-muted-foreground">Instructor</p>
                 </div>
               </div>
               <div className="text-yellow-400 mb-3">★★★★★</div>
-              <p className="text-neutral-600">
+              <p className="text-muted-foreground">
                 "As a fitness instructor, FindMeFit has helped me grow my client base and manage my schedule efficiently. The platform is intuitive and professional."
               </p>
             </div>
             
-            <div className="bg-neutral-50 p-6 rounded-xl">
+            <div className="bg-card border border-border/50 p-6 rounded-xl">
               <div className="flex items-center mb-4">
                 <img
                   src="https://images.pexels.com/photos/3771089/pexels-photo-3771089.jpeg?auto=compress&cs=tinysrgb&w=600"
@@ -221,12 +221,12 @@ export const HomePage: React.FC = () => {
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 <div className="ml-3">
-                  <p className="font-medium">David K.</p>
-                  <p className="text-sm text-neutral-500">Client</p>
+                  <p className="font-medium text-card-foreground">David K.</p>
+                  <p className="text-sm text-muted-foreground">Client</p>
                 </div>
               </div>
               <div className="text-yellow-400 mb-3">★★★★★</div>
-              <p className="text-neutral-600">
+              <p className="text-muted-foreground">
                 "I love how easy it is to discover and book fitness classes in my area. The interactive map feature helped me find a great yoga studio just a few blocks from my home!"
               </p>
             </div>

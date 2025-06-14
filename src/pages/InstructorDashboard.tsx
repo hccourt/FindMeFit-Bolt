@@ -67,11 +67,11 @@ export const InstructorDashboard: React.FC = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-neutral-600">Total Classes</p>
-                      <p className="text-2xl font-bold text-neutral-900">{instructorClasses.length}</p>
+                      <p className="text-sm text-muted-foreground">Total Classes</p>
+                      <p className="text-2xl font-bold text-foreground">{instructorClasses.length}</p>
                     </div>
-                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                      <Calendar className="h-5 w-5 text-primary-600" />
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Calendar className="h-5 w-5 text-primary" />
                     </div>
                   </div>
                 </CardContent>
@@ -81,13 +81,13 @@ export const InstructorDashboard: React.FC = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-neutral-600">Total Students</p>
-                      <p className="text-2xl font-bold text-neutral-900">
+                      <p className="text-sm text-muted-foreground">Total Students</p>
+                      <p className="text-2xl font-bold text-foreground">
                         {instructorClasses.reduce((acc, c) => acc + c.currentParticipants, 0)}
                       </p>
                     </div>
-                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                      <Users className="h-5 w-5 text-primary-600" />
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Users className="h-5 w-5 text-primary" />
                     </div>
                   </div>
                 </CardContent>
@@ -97,16 +97,16 @@ export const InstructorDashboard: React.FC = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-neutral-600">Revenue</p>
-                      <p className="text-2xl font-bold text-neutral-900">
+                      <p className="text-sm text-muted-foreground">Revenue</p>
+                      <p className="text-2xl font-bold text-foreground">
                         {formatCurrency(
                           instructorClasses.reduce((acc, c) => acc + (c.price * c.currentParticipants), 0),
                           currentRegion
                         )}
                       </p>
                     </div>
-                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                      <span className="text-xl font-bold text-primary-600">$</span>
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <span className="text-xl font-bold text-primary">$</span>
                     </div>
                   </div>
                 </CardContent>
@@ -123,7 +123,7 @@ export const InstructorDashboard: React.FC = () => {
                   <div className="space-y-4">
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="h-24 bg-neutral-100 rounded-lg"></div>
+                        <div className="h-24 bg-muted rounded-lg"></div>
                       </div>
                     ))}
                   </div>
@@ -132,7 +132,7 @@ export const InstructorDashboard: React.FC = () => {
                     {upcomingClasses.map(classItem => (
                       <div
                         key={classItem.id}
-                        className="flex items-center p-4 border rounded-lg hover:border-primary-500 transition-colors"
+                        className="flex items-center p-4 border border-border rounded-lg hover:border-primary transition-colors"
                       >
                         <img
                           src={classItem.imageUrl}
@@ -141,12 +141,12 @@ export const InstructorDashboard: React.FC = () => {
                         />
                         <div className="ml-4 flex-1">
                           <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold text-lg">{classItem.title}</h3>
+                            <h3 className="font-semibold text-lg text-foreground">{classItem.title}</h3>
                             <Badge variant={classItem.type === 'personal' ? 'primary' : 'default'}>
                               {classItem.type === 'personal' ? 'Personal Training' : 'Group Class'}
                             </Badge>
                           </div>
-                          <div className="space-y-1 text-sm text-neutral-600">
+                          <div className="space-y-1 text-sm text-muted-foreground">
                             <div className="flex items-center">
                               <Calendar className="w-4 h-4 mr-2" />
                               <span>{formatDate(new Date(classItem.startTime), currentRegion.dateLocale)}</span>
@@ -180,11 +180,11 @@ export const InstructorDashboard: React.FC = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-600 mb-4">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4">
                       <Calendar className="w-6 h-6" />
                     </div>
-                    <h3 className="text-lg font-medium mb-2">No upcoming classes</h3>
-                    <p className="text-neutral-600 mb-4">
+                    <h3 className="text-lg font-medium mb-2 text-foreground">No upcoming classes</h3>
+                    <p className="text-muted-foreground mb-4">
                       You haven't created any upcoming classes yet.
                     </p>
                     <Button onClick={() => setShowNewClassForm(true)}>Create Class</Button>
@@ -204,7 +204,7 @@ export const InstructorDashboard: React.FC = () => {
                     {pastClasses.map(classItem => (
                       <div
                         key={classItem.id}
-                        className="flex items-center p-4 border rounded-lg bg-neutral-50"
+                        className="flex items-center p-4 border border-border rounded-lg bg-muted/50"
                       >
                         <img
                           src={classItem.imageUrl}
@@ -212,8 +212,8 @@ export const InstructorDashboard: React.FC = () => {
                           className="w-16 h-16 object-cover rounded-lg"
                         />
                         <div className="ml-4 flex-1">
-                          <h4 className="font-medium">{classItem.title}</h4>
-                          <div className="flex items-center mt-1 text-sm text-neutral-600">
+                          <h4 className="font-medium text-foreground">{classItem.title}</h4>
+                          <div className="flex items-center mt-1 text-sm text-muted-foreground">
                             <Calendar className="w-4 h-4 mr-2" />
                             <span>{formatDate(new Date(classItem.startTime), currentRegion.dateLocale)}</span>
                             <span className="mx-2">•</span>
@@ -230,7 +230,7 @@ export const InstructorDashboard: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-6 text-neutral-600">
+                  <div className="text-center py-6 text-muted-foreground">
                     No past classes to show
                   </div>
                 )}
@@ -253,7 +253,7 @@ export const InstructorDashboard: React.FC = () => {
                   />
                   
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Class Type
                     </label>
                     <div className="space-y-2">
@@ -262,20 +262,20 @@ export const InstructorDashboard: React.FC = () => {
                           type="checkbox"
                           className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                         />
-                        <span className="ml-2 text-sm">Group Classes</span>
+                        <span className="ml-2 text-sm text-foreground">Group Classes</span>
                       </label>
                       <label className="flex items-center">
                         <input
                           type="checkbox"
                           className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                         />
-                        <span className="ml-2 text-sm">Personal Training</span>
+                        <span className="ml-2 text-sm text-foreground">Personal Training</span>
                       </label>
                     </div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Status
                     </label>
                     <div className="space-y-2">
@@ -284,21 +284,21 @@ export const InstructorDashboard: React.FC = () => {
                           type="checkbox"
                           className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                         />
-                        <span className="ml-2 text-sm">Upcoming</span>
+                        <span className="ml-2 text-sm text-foreground">Upcoming</span>
                       </label>
                       <label className="flex items-center">
                         <input
                           type="checkbox"
                           className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                         />
-                        <span className="ml-2 text-sm">Past</span>
+                        <span className="ml-2 text-sm text-foreground">Past</span>
                       </label>
                       <label className="flex items-center">
                         <input
                           type="checkbox"
                           className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                         />
-                        <span className="ml-2 text-sm">Cancelled</span>
+                        <span className="ml-2 text-sm text-foreground">Cancelled</span>
                       </label>
                     </div>
                   </div>

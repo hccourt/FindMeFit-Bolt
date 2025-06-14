@@ -103,31 +103,31 @@ export const ClassDetailPage: React.FC = () => {
   
   return (
     <Layout>
-      <div className="bg-primary-50 py-8">
+      <div className="bg-muted py-8">
         <Container>
           <div className="flex items-center space-x-2 text-sm text-neutral-600 mb-4">
             <span>Classes</span>
             <span>›</span>
-            <span className="text-primary-500">
+            <span className="text-primary">
               {classItem.type === 'personal' ? 'Personal Training' : 'Group Class'}
             </span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-2">{classItem.title}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{classItem.title}</h1>
           
           <div className="flex flex-wrap items-center gap-4 mt-4">
             <div className="flex items-center">
-              <MapPin className="h-5 w-5 text-neutral-500 mr-1" />
-              <span className="text-neutral-700">
+              <MapPin className="h-5 w-5 text-muted-foreground mr-1" />
+              <span className="text-foreground">
                 {classItem.location.name}, {classItem.location.parent?.name}
               </span>
             </div>
             <div className="flex items-center">
-              <Calendar className="h-5 w-5 text-neutral-500 mr-1" />
-              <span className="text-neutral-700">{formatDate(startDate, currentRegion.dateLocale)}</span>
+              <Calendar className="h-5 w-5 text-muted-foreground mr-1" />
+              <span className="text-foreground">{formatDate(startDate, currentRegion.dateLocale)}</span>
             </div>
             <div className="flex items-center">
-              <Clock className="h-5 w-5 text-neutral-500 mr-1" />
-              <span className="text-neutral-700">
+              <Clock className="h-5 w-5 text-muted-foreground mr-1" />
+              <span className="text-foreground">
                 {formatTime(startDate, currentRegion.dateLocale)} - {formatTime(endDate, currentRegion.dateLocale)}
               </span>
             </div>

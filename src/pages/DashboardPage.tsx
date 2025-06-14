@@ -269,7 +269,7 @@ export const DashboardPage: React.FC = () => {
                     {completedBookings.map(booking => (
                       <div
                         key={booking.id}
-                        className="flex items-center p-4 border rounded-lg bg-neutral-50"
+                        className="flex items-center p-4 border border-border rounded-lg bg-muted/50"
                       >
                         <img
                           src={booking.classDetails?.imageUrl || 'https://images.pexels.com/photos/4498151/pexels-photo-4498151.jpeg'}
@@ -277,8 +277,8 @@ export const DashboardPage: React.FC = () => {
                           className="w-16 h-16 object-cover rounded-lg"
                         />
                         <div className="ml-4">
-                          <h4 className="font-medium">{booking.classDetails?.title}</h4>
-                          <p className="text-sm text-neutral-600">
+                          <h4 className="font-medium text-foreground">{booking.classDetails?.title}</h4>
+                          <p className="text-sm text-muted-foreground">
                             {formatDate(new Date(booking.classDetails.startTime), currentRegion.dateLocale)}
                           </p>
                         </div>
@@ -286,7 +286,7 @@ export const DashboardPage: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-6 text-neutral-600">
+                  <div className="text-center py-6 text-muted-foreground">
                     No past activities to show
                   </div>
                 )}
@@ -306,43 +306,43 @@ export const DashboardPage: React.FC = () => {
                   <div className="flex items-center space-x-4">
                     <Avatar src={user.profileImage} name={user.name} size="xl" />
                     <div>
-                      <h3 className="font-semibold text-lg">{user.name}</h3>
+                      <h3 className="font-semibold text-lg text-foreground">{user.name}</h3>
                       <span className={`inline-block px-2 py-0.5 text-sm font-medium rounded-full capitalize mt-1 ${getRoleBadgeColor(user.role)}`}>
                         {user.role} Account
                       </span>
                     </div>
                   </div>
                   
-                  <div className="space-y-4 border-t border-neutral-200 pt-4">
+                  <div className="space-y-4 border-t border-border pt-4">
                     <div className="flex items-center space-x-3">
-                      <Mail className="w-5 h-5 text-neutral-500" />
+                      <Mail className="w-5 h-5 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-neutral-500">Email</p>
-                        <p className="font-medium">{user.email}</p>
+                        <p className="text-sm text-muted-foreground">Email</p>
+                        <p className="font-medium text-foreground">{user.email}</p>
                       </div>
                     </div>
                     
                     <div className="flex items-center space-x-3">
-                      <Phone className="w-5 h-5 text-neutral-500" />
+                      <Phone className="w-5 h-5 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-neutral-500">Phone</p>
-                        <p className="font-medium">{user.phone || 'Not provided'}</p>
+                        <p className="text-sm text-muted-foreground">Phone</p>
+                        <p className="font-medium text-foreground">{user.phone || 'Not provided'}</p>
                       </div>
                     </div>
                     
                     <div className="flex items-center space-x-3">
-                      <MapPin className="w-5 h-5 text-neutral-500" />
+                      <MapPin className="w-5 h-5 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-neutral-500">Location</p>
-                        <p className="font-medium">{user.location || 'Not provided'}</p>
+                        <p className="text-sm text-muted-foreground">Location</p>
+                        <p className="font-medium text-foreground">{user.location || 'Not provided'}</p>
                       </div>
                     </div>
                     
                     <div className="flex items-center space-x-3">
-                      <JoinedIcon className="w-5 h-5 text-neutral-500" />
+                      <JoinedIcon className="w-5 h-5 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-neutral-500">Member Since</p>
-                        <p className="font-medium">{formatDate(user.joined, currentRegion.dateLocale)}</p>
+                        <p className="text-sm text-muted-foreground">Member Since</p>
+                        <p className="font-medium text-foreground">{formatDate(user.joined, currentRegion.dateLocale)}</p>
                       </div>
                     </div>
                   </div>
@@ -361,17 +361,17 @@ export const DashboardPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-primary-50 rounded-lg">
-                    <p className="text-2xl font-bold text-primary-600">
+                  <div className="text-center p-4 bg-primary/10 rounded-lg border border-primary/20">
+                    <p className="text-2xl font-bold text-primary">
                       {upcomingBookings.length}
                     </p>
-                    <p className="text-sm text-neutral-600">Upcoming</p>
+                    <p className="text-sm text-muted-foreground">Upcoming</p>
                   </div>
-                  <div className="text-center p-4 bg-primary-50 rounded-lg">
-                    <p className="text-2xl font-bold text-primary-600">
+                  <div className="text-center p-4 bg-primary/10 rounded-lg border border-primary/20">
+                    <p className="text-2xl font-bold text-primary">
                       {completedBookings.length}
                     </p>
-                    <p className="text-sm text-neutral-600">Completed</p>
+                    <p className="text-sm text-muted-foreground">Completed</p>
                   </div>
                 </div>
               </CardContent>

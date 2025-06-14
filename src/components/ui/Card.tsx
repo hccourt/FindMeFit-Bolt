@@ -11,10 +11,10 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'rounded-xl overflow-hidden bg-card text-card-foreground',
+          'rounded-xl overflow-hidden bg-card text-card-foreground border border-border/50',
           {
-            'shadow-soft': variant === 'default',
-            'border border-border': variant === 'outline',
+            'shadow-soft dark:shadow-none': variant === 'default',
+            'border-2 border-border': variant === 'outline',
           },
           className
         )}
