@@ -18,6 +18,8 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/nominatim/, ''),
       }
-    }
+    },
+    // Add allowed hosts to resolve the blocked request error
+    allowedHosts: ['fmf.harrycourt.co.uk']
   }
 });
