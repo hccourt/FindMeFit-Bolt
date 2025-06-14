@@ -105,8 +105,8 @@ export const ClassDetailPage: React.FC = () => {
     <Layout>
       <div className="bg-muted py-8">
         <Container>
-          <div className="flex items-center space-x-2 text-sm text-neutral-600 mb-4">
-            <span>Classes</span>
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-4">
+            <span className="text-muted-foreground">Classes</span>
             <span>›</span>
             <span className="text-primary">
               {classItem.type === 'personal' ? 'Personal Training' : 'Group Class'}
@@ -158,11 +158,11 @@ export const ClassDetailPage: React.FC = () => {
               />
             </div>
             
-            <h2 className="text-2xl font-bold mb-4">About This Class</h2>
+            <h2 className="text-2xl font-bold mb-4 text-foreground">About This Class</h2>
             <p className="text-muted-foreground mb-6">{classItem.description}</p>
             
             <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-3">Class Details</h3>
+              <h3 className="text-lg font-semibold mb-3 text-foreground">Class Details</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center">
                   <Users className="h-5 w-5 text-primary mr-3" />
@@ -204,7 +204,7 @@ export const ClassDetailPage: React.FC = () => {
             </div>
             
             <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-3">Location</h3>
+              <h3 className="text-lg font-semibold mb-3 text-foreground">Location</h3>
               <div className="flex items-start mb-4">
                 <MapPin className="h-5 w-5 text-primary mr-3 mt-1" />
                 <div>
@@ -226,7 +226,7 @@ export const ClassDetailPage: React.FC = () => {
             </div>
             
             <div>
-              <h3 className="text-lg font-semibold mb-3">About the Instructor</h3>
+              <h3 className="text-lg font-semibold mb-3 text-foreground">About the Instructor</h3>
               <div className="flex items-center space-x-4 mb-4">
                 <Avatar
                   src={classItem.instructor.profileImage}
@@ -234,7 +234,7 @@ export const ClassDetailPage: React.FC = () => {
                   size="lg"
                 />
                 <div>
-                  <p className="font-semibold text-lg">{classItem.instructor.name}</p>
+                  <p className="font-semibold text-lg text-foreground">{classItem.instructor.name}</p>
                   <div className="flex items-center mt-1">
                     <div className="text-yellow-400 flex">
                       ★★★★★
@@ -291,7 +291,7 @@ export const ClassDetailPage: React.FC = () => {
                 </div>
                 
                 {bookingSuccess ? (
-                  <div className="bg-success-50 text-success-700 p-4 rounded-lg text-center mb-4">
+                  <div className="bg-success-100 dark:bg-success-900/20 text-success-900 dark:text-success-300 p-4 rounded-lg text-center mb-4 border border-success-200 dark:border-success-800">
                     <p className="font-medium">Booking Confirmed!</p>
                     <p className="text-sm mt-1">
                       You're all set for {formatDate(startDate, currentRegion.dateLocale)} at {formatTime(startDate, currentRegion.dateLocale)}
@@ -305,7 +305,7 @@ export const ClassDetailPage: React.FC = () => {
                     </Button>
                   </div>
                 ) : classItem.isBooked ? (
-                  <div className="bg-primary-50 text-primary-700 p-4 rounded-lg text-center mb-4">
+                  <div className="bg-primary/10 text-primary p-4 rounded-lg text-center mb-4 border border-primary/20">
                     <p className="font-medium">You're already booked!</p>
                     <p className="text-sm mt-1">
                       View your booking in the dashboard
