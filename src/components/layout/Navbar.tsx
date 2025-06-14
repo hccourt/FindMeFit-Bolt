@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut, Calendar, Search, Sun, Moon } from 'lucide-react';
+import { Menu, X, User, LogOut, Calendar, Search, Sun, Moon, Home, Settings, BookOpen } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Container } from '../ui/Container';
 import { useAuthStore, useThemeStore } from '../../lib/store';
@@ -23,18 +23,11 @@ export const Navbar: React.FC = () => {
   
   const handleLogout = async () => {
     try {
-      // Sign out from Supabase
       await supabase.auth.signOut();
-      
-      // Clear auth store state
       logout();
-      
-      // Clear any persisted state
       if (useAuthStore.persist.clearStorage) {
         await useAuthStore.persist.clearStorage();
       }
-      
-      // Navigate to home
       navigate('/');
       setIsUserPanelOpen(false);
     } catch (error) {
@@ -43,11 +36,11 @@ export const Navbar: React.FC = () => {
   };
   
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-border">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
       <Container>
         <nav className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link to="/" className="flex-shrink-0">
+          <Link to="/" className="flex-shrink-0 ml-4">
             <Logo />
           </Link>
 
@@ -59,18 +52,18 @@ export const Navbar: React.FC = () => {
                 placeholder="Search classes, trainers, or locations"
                 className="w-full pl-10 pr-4 py-3 rounded-full border border-input bg-background shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             </div>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             {user?.role === 'instructor' ? (
-              <Link to="/instructor\" className="text-sm font-medium hover:text-primary-500">
+              <Link to="/instructor" className="text-sm font-medium hover:text-primary-500 whitespace-nowrap">
                 Manage
               </Link>
             ) : (
-              <Link to="/discover" className="text-sm font-medium hover:text-primary-500">
+              <Link to="/discover" className="text-sm font-medium hover:text-primary-500 whitespace-nowrap">
                 Discover Classes
               </Link>
             )}
@@ -86,10 +79,10 @@ export const Navbar: React.FC = () => {
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="ghost" size="sm">Log In</Button>
+                  <Button variant="ghost" size="sm" className="whitespace-nowrap">Log In</Button>
                 </Link>
                 <Link to="/signup">
-                  <Button size="sm">Sign Up</Button>
+                  <Button size="sm" className="whitespace-nowrap">Sign Up</Button>
                 </Link>
               </>
             )}
@@ -97,7 +90,7 @@ export const Navbar: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden rounded-full p-2 hover:bg-muted"
+            className="md:hidden rounded-full p-2 hover:bg-muted mr-4"
             onClick={toggleMenu}
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
@@ -108,89 +101,112 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-white md:hidden">
+        <div className={`fixed inset-0 z-50 ${isDarkMode ? 'bg-background' : 'bg-white'} md:hidden`}>
           <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between p-4 border-b border-neutral-200">
-              <Link to="/" onClick={closeMenu}>
+            <div className="flex items-center justify-between h-20 px-4 border-b border-border">
+              <Link to="/" onClick={closeMenu} className="ml-4">
                 <Logo />
               </Link>
               <button
-                className="rounded-full p-2 hover:bg-neutral-100"
+                className="rounded-full p-2 hover:bg-muted mr-4"
                 onClick={closeMenu}
                 aria-label="Close menu"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
               {/* Location Picker - Mobile */}
-              <div className="mb-4">
+              <div className="mb-6">
                 <LocationPicker />
               </div>
               
-              <div className="mb-4">
+              <div className="mb-6">
                 <input
                   type="text"
                   placeholder="Search classes, trainers, or locations"
-                  className="w-full pl-10 pr-4 py-3 rounded-full border border-neutral-300"
+                  className="w-full pl-10 pr-4 py-3 rounded-full border border-input bg-background"
                 />
               </div>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {user?.role === 'instructor' ? (
                   <Link
                     to="/instructor"
-                    className="block p-3 rounded-lg hover:bg-neutral-50"
+                    className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-muted whitespace-nowrap"
                     onClick={closeMenu}
                   >
-                    Manage
+                    <Calendar className="h-5 w-5" />
+                    <span>Manage</span>
                   </Link>
                 ) : (
                   <Link
                     to="/discover"
-                    className="block p-3 rounded-lg hover:bg-neutral-50"
+                    className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-muted whitespace-nowrap"
                     onClick={closeMenu}
                   >
-                    Discover Classes
+                    <Search className="h-5 w-5" />
+                    <span>Discover Classes</span>
                   </Link>
                 )}
                 {isAuthenticated ? (
                   <>
                     <Link
                       to="/dashboard"
-                      className="block p-3 rounded-lg hover:bg-neutral-50"
+                      className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-muted whitespace-nowrap"
                       onClick={closeMenu}
                     >
-                      Dashboard
+                      <Home className="h-5 w-5" />
+                      <span>Dashboard</span>
                     </Link>
                     <Link
                       to={`/profile/${user?.id}`}
-                      className="block p-3 rounded-lg hover:bg-neutral-50"
+                      className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-muted whitespace-nowrap"
                       onClick={closeMenu}
                     >
-                      Profile Settings
+                      <User className="h-5 w-5" />
+                      <span>Profile Settings</span>
                     </Link>
                     <button
-                      onClick={handleLogout}
-                      className="block w-full text-left p-3 rounded-lg hover:bg-neutral-50 text-error-600"
+                      onClick={toggleDarkMode}
+                      className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg hover:bg-muted whitespace-nowrap"
                     >
-                      Sign Out
+                      {isDarkMode ? (
+                        <>
+                          <Sun className="h-5 w-5" />
+                          <span>Light Mode</span>
+                        </>
+                      ) : (
+                        <>
+                          <Moon className="h-5 w-5" />
+                          <span>Dark Mode</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg hover:bg-muted text-error whitespace-nowrap"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span>Sign Out</span>
                     </button>
                   </>
                 ) : (
                   <>
                     <Link
                       to="/login"
-                      className="block p-3 rounded-lg hover:bg-neutral-50"
+                      className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-muted whitespace-nowrap"
                       onClick={closeMenu}
                     >
-                      Log In
+                      <LogOut className="h-5 w-5" />
+                      <span>Log In</span>
                     </Link>
                     <Link
                       to="/signup"
-                      className="block p-3 rounded-lg bg-primary-500 text-white hover:bg-primary-600"
+                      className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary text-white hover:bg-primary/90 whitespace-nowrap"
                       onClick={closeMenu}
                     >
-                      Sign Up
+                      <BookOpen className="h-5 w-5" />
+                      <span>Sign Up</span>
                     </Link>
                   </>
                 )}
@@ -216,7 +232,7 @@ export const Navbar: React.FC = () => {
               {user?.role === 'instructor' && (
                 <Link
                   to="/instructor"
-                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted text-foreground"
+                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted text-foreground whitespace-nowrap"
                   onClick={() => setIsUserPanelOpen(false)}
                 >
                   <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -225,15 +241,15 @@ export const Navbar: React.FC = () => {
               )}
               <Link
                 to="/dashboard"
-                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted text-foreground"
+                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted text-foreground whitespace-nowrap"
                 onClick={() => setIsUserPanelOpen(false)}
               >
-                <Calendar className="h-5 w-5 text-muted-foreground" />
+                <Home className="h-5 w-5 text-muted-foreground" />
                 <span>Dashboard</span>
               </Link>
               <Link
                 to="/discover"
-                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted text-foreground"
+                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted text-foreground whitespace-nowrap"
                 onClick={() => setIsUserPanelOpen(false)}
               >
                 <Search className="h-5 w-5 text-muted-foreground" />
@@ -241,7 +257,7 @@ export const Navbar: React.FC = () => {
               </Link>
               <Link
                 to={`/profile/${user?.id}`}
-                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted text-foreground"
+                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted text-foreground whitespace-nowrap"
                 onClick={() => setIsUserPanelOpen(false)}
               >
                 <User className="h-5 w-5 text-muted-foreground" />
@@ -249,7 +265,7 @@ export const Navbar: React.FC = () => {
               </Link>
               <button
                 onClick={toggleDarkMode}
-                className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-muted text-foreground"
+                className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-muted text-foreground whitespace-nowrap"
               >
                 {isDarkMode ? (
                   <>
@@ -265,7 +281,7 @@ export const Navbar: React.FC = () => {
               </button>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-muted text-error-600"
+                className="flex items-center space-x-3 w-full p-3 rounded-lg hover:bg-muted text-error whitespace-nowrap"
               >
                 <LogOut className="h-5 w-5" />
                 <span>Sign Out</span>
