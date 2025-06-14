@@ -38,14 +38,14 @@ export const HomePage: React.FC = () => {
       <Hero />
       
       {/* Featured Classes Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-background">
         <Container>
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-neutral-900">
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">
                 {currentLocation ? `Featured Classes in ${currentLocation.name}` : 'Featured Classes'}
               </h2>
-              <p className="mt-2 text-neutral-600">
+              <p className="mt-2 text-muted-foreground">
                 {currentLocation 
                   ? 'Discover our most popular fitness experiences' 
                   : 'Set your location to discover fitness classes near you'
@@ -60,15 +60,15 @@ export const HomePage: React.FC = () => {
           </div>
           
           {!currentLocation ? (
-            <div className="text-center py-12 bg-neutral-50 rounded-xl">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-600 mb-4">
+            <div className="text-center py-12 bg-muted rounded-xl">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4">
                 <ArrowRight className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-medium mb-2">Set Your Location</h3>
-              <p className="text-neutral-600 mb-6">
+              <h3 className="text-lg font-medium mb-2 text-foreground">Set Your Location</h3>
+              <p className="text-muted-foreground mb-6">
                 Choose your location to discover fitness classes and trainers in your area.
               </p>
-              <p className="text-sm text-neutral-500">
+              <p className="text-sm text-muted-foreground">
                 Use the location picker in the top navigation to get started.
               </p>
             </div>
@@ -79,7 +79,7 @@ export const HomePage: React.FC = () => {
                 .map((_, index) => (
                   <div
                     key={index}
-                    className="rounded-xl bg-neutral-100 h-[400px] animate-pulse-subtle"
+                    className="rounded-xl bg-muted h-[400px] animate-pulse-subtle"
                   ></div>
                 ))}
             </div>
@@ -90,12 +90,12 @@ export const HomePage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-neutral-50 rounded-xl">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-600 mb-4">
+            <div className="text-center py-12 bg-muted rounded-xl">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4">
                 <ArrowRight className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-medium mb-2">No Classes Available</h3>
-              <p className="text-neutral-600 mb-6">
+              <h3 className="text-lg font-medium mb-2 text-foreground">No Classes Available</h3>
+              <p className="text-muted-foreground mb-6">
                 There are currently no featured classes in {currentLocation.name}.
               </p>
               <Link to="/discover">

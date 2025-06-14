@@ -159,43 +159,43 @@ export const ClassDetailPage: React.FC = () => {
             </div>
             
             <h2 className="text-2xl font-bold mb-4">About This Class</h2>
-            <p className="text-neutral-700 mb-6">{classItem.description}</p>
+            <p className="text-muted-foreground mb-6">{classItem.description}</p>
             
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-3">Class Details</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center">
-                  <Users className="h-5 w-5 text-primary-500 mr-3" />
+                  <Users className="h-5 w-5 text-primary mr-3" />
                   <div>
-                    <p className="font-medium">Class Size</p>
-                    <p className="text-sm text-neutral-600">
+                    <p className="font-medium text-foreground">Class Size</p>
+                    <p className="text-sm text-muted-foreground">
                       {classItem.currentParticipants}/{classItem.maxParticipants} participants
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center">
-                  <Clock className="h-5 w-5 text-primary-500 mr-3" />
+                  <Clock className="h-5 w-5 text-primary mr-3" />
                   <div>
-                    <p className="font-medium">Duration</p>
-                    <p className="text-sm text-neutral-600">
+                    <p className="font-medium text-foreground">Duration</p>
+                    <p className="text-sm text-muted-foreground">
                       {(endDate.getTime() - startDate.getTime()) / (1000 * 60)} minutes
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center">
-                  <Dumbbell className="h-5 w-5 text-primary-500 mr-3" />
+                  <Dumbbell className="h-5 w-5 text-primary mr-3" />
                   <div>
-                    <p className="font-medium">Class Type</p>
-                    <p className="text-sm text-neutral-600">
+                    <p className="font-medium text-foreground">Class Type</p>
+                    <p className="text-sm text-muted-foreground">
                       {classItem.type === 'personal' ? 'Personal Training' : 'Group Class'}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center">
-                  <Star className="h-5 w-5 text-primary-500 mr-3" />
+                  <Star className="h-5 w-5 text-primary mr-3" />
                   <div>
-                    <p className="font-medium">Skill Level</p>
-                    <p className="text-sm text-neutral-600">
+                    <p className="font-medium text-foreground">Skill Level</p>
+                    <p className="text-sm text-muted-foreground">
                       {classItem.level.charAt(0).toUpperCase() + classItem.level.slice(1)}
                     </p>
                   </div>
@@ -206,10 +206,10 @@ export const ClassDetailPage: React.FC = () => {
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-3">Location</h3>
               <div className="flex items-start mb-4">
-                <MapPin className="h-5 w-5 text-primary-500 mr-3 mt-1" />
+                <MapPin className="h-5 w-5 text-primary mr-3 mt-1" />
                 <div>
-                  <p className="font-medium">{classItem.location.name}</p>
-                  <p className="text-sm text-neutral-600">
+                  <p className="font-medium text-foreground">{classItem.location.name}</p>
+                  <p className="text-sm text-muted-foreground">
                     {classItem.location.parent?.name}
                   </p>
                 </div>
@@ -239,7 +239,7 @@ export const ClassDetailPage: React.FC = () => {
                     <div className="text-yellow-400 flex">
                       ★★★★★
                     </div>
-                    <span className="ml-1 text-sm text-neutral-600">
+                    <span className="ml-1 text-sm text-muted-foreground">
                       {classItem.instructor.rating} ({classItem.instructor.reviewCount} reviews)
                     </span>
                   </div>
@@ -252,7 +252,7 @@ export const ClassDetailPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <p className="text-neutral-700">
+              <p className="text-muted-foreground">
                 {classItem.instructor.bio ||
                   `Professional instructor with ${classItem.instructor.experience} years of experience in fitness coaching. Specializes in ${classItem.instructor.specialties.join(
                     ', '
@@ -265,28 +265,28 @@ export const ClassDetailPage: React.FC = () => {
             <Card className="sticky top-24">
               <CardContent className="p-6">
                 <div className="text-center mb-6">
-                  <p className="text-3xl font-bold text-primary-500">{formatCurrency(classItem.price, currentRegion)}</p>
-                  <p className="text-neutral-600 text-sm">per session</p>
+                  <p className="text-3xl font-bold text-primary">{formatCurrency(classItem.price, currentRegion)}</p>
+                  <p className="text-muted-foreground text-sm">per session</p>
                 </div>
                 
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between">
-                    <span className="text-neutral-600">Date</span>
-                    <span className="font-medium">{formatDate(startDate, currentRegion.dateLocale)}</span>
+                    <span className="text-muted-foreground">Date</span>
+                    <span className="font-medium text-foreground">{formatDate(startDate, currentRegion.dateLocale)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-600">Time</span>
-                    <span className="font-medium">
+                    <span className="text-muted-foreground">Time</span>
+                    <span className="font-medium text-foreground">
                       {formatTime(startDate, currentRegion.dateLocale)} - {formatTime(endDate, currentRegion.dateLocale)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-600">Location</span>
-                    <span className="font-medium">{classItem.location.name}</span>
+                    <span className="text-muted-foreground">Location</span>
+                    <span className="font-medium text-foreground">{classItem.location.name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-600">Spots Left</span>
-                    <span className="font-medium">{spotsLeft}</span>
+                    <span className="text-muted-foreground">Spots Left</span>
+                    <span className="font-medium text-foreground">{spotsLeft}</span>
                   </div>
                 </div>
                 
@@ -349,7 +349,7 @@ export const ClassDetailPage: React.FC = () => {
                   </Button>
                 )}
                 
-                <p className="text-xs text-neutral-500 text-center mt-4">
+                <p className="text-xs text-muted-foreground text-center mt-4">
                   No payment required now. Pay at the venue.
                 </p>
               </CardContent>

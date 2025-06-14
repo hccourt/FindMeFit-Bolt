@@ -181,24 +181,24 @@ export const DiscoverPage: React.FC = () => {
               </Button>
             </div>
           ) : (
-            <div className="text-center py-8 bg-white rounded-xl shadow-soft">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-600 mb-4">
+            <div className="text-center py-8 bg-card border border-border rounded-xl shadow-soft">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4">
                 <Search className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-medium mb-2">Set Your Location First</h3>
-              <p className="text-neutral-600 mb-4">
+              <h3 className="text-lg font-medium mb-2 text-foreground">Set Your Location First</h3>
+              <p className="text-muted-foreground mb-4">
                 Please select your location using the location picker in the navigation to discover classes in your area.
               </p>
-              <p className="text-sm text-neutral-500">
+              <p className="text-sm text-muted-foreground">
                 Click on the location selector in the top navigation bar to get started.
               </p>
             </div>
           )}
           
           {currentLocation && showFilters && (
-            <div className="mt-4 p-4 bg-white rounded-lg shadow-soft">
+            <div className="mt-4 p-4 bg-card border border-border rounded-lg shadow-soft">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Filters</h3>
+                <h3 className="text-lg font-semibold text-foreground">Filters</h3>
                 {hasActiveFilters() && (
                   <Button size="sm" variant="ghost" onClick={clearFilters}>
                     Clear All
@@ -208,7 +208,7 @@ export const DiscoverPage: React.FC = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <h4 className="font-medium mb-2">Class Type</h4>
+                  <h4 className="font-medium mb-2 text-foreground">Class Type</h4>
                   <div className="space-y-2">
                     <div className="flex items-center">
                       <input
@@ -238,7 +238,7 @@ export const DiscoverPage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <h4 className="font-medium mb-2">Skill Level</h4>
+                  <h4 className="font-medium mb-2 text-foreground">Skill Level</h4>
                   <div className="space-y-2">
                     <div className="flex items-center">
                       <input
@@ -292,7 +292,7 @@ export const DiscoverPage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <h4 className="font-medium mb-2">Price Range ({currentRegion.currency})</h4>
+                  <h4 className="font-medium mb-2 text-foreground">Price Range ({currentRegion.currency})</h4>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-foreground">{filters.price.min}</span>
