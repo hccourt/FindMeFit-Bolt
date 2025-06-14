@@ -91,11 +91,6 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/careers" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Careers
-                </Link>
-              </li>
-              <li>
                 <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                   Blog
                 </Link>
@@ -144,12 +139,12 @@ export const Footer: React.FC = () => {
               <li className="flex items-start space-x-3">
                 <MapPin className="h-5 w-5 text-primary-500 flex-shrink-0" />
                 <span className="text-muted-foreground text-sm">
-                  123 Fitness Avenue, San Francisco, CA 94158
+                  45 High Street, Kidlington, Oxfordshire OX5 2DH
                 </span>
               </li>
               <li className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-primary-500 flex-shrink-0" />
-                <span className="text-muted-foreground text-sm">+1 (555) 123-4567</span>
+                <span className="text-muted-foreground text-sm">01865 842 156</span>
               </li>
               <li className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-primary-500 flex-shrink-0" />
