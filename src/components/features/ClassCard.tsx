@@ -38,7 +38,7 @@ export const ClassCard: React.FC<ClassCardProps> = ({ classItem }) => {
   const isFull = spotsLeft === 0;
   
   return (
-    <Card className="h-full overflow-hidden transition-all duration-200 hover:shadow-medium">
+    <Card className="h-full overflow-hidden transition-all duration-200 hover:shadow-medium dark:hover:shadow-none dark:hover:border-primary/50">
       <Link to={`/classes/${id}`} className="flex flex-col h-full">
         <div className="relative aspect-[4/3] w-full overflow-hidden">
           <img
@@ -61,41 +61,41 @@ export const ClassCard: React.FC<ClassCardProps> = ({ classItem }) => {
         
         <CardContent className="flex flex-col flex-1">
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-lg font-semibold line-clamp-1">{title}</h3>
-            <span className="font-semibold text-primary-500">{formatCurrency(price, currentRegion)}</span>
+            <h3 className="text-lg font-semibold line-clamp-1 text-card-foreground">{title}</h3>
+            <span className="font-semibold text-primary">{formatCurrency(price, currentRegion)}</span>
           </div>
           
           <div className="flex items-center space-x-2 mb-3">
-            <Clock className="h-4 w-4 text-neutral-500" />
-            <span className="text-sm text-neutral-600">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
               {formatDate(startDate, currentRegion.dateLocale)} • {formatTime(startDate, currentRegion.dateLocale)} - {formatTime(endDate, currentRegion.dateLocale)}
             </span>
           </div>
           
           <div className="flex items-center space-x-2 mb-3">
-            <MapPin className="h-4 w-4 text-neutral-500" />
-            <span className="text-sm text-neutral-600 line-clamp-1">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground line-clamp-1">
               {location.name}, {location.city}
             </span>
           </div>
           
           <div className="flex items-center space-x-2 mb-4">
-            <Users className="h-4 w-4 text-neutral-500" />
-            <span className="text-sm text-neutral-600">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
               {currentParticipants}/{maxParticipants} participants
             </span>
           </div>
           
-          <div className="mt-auto flex items-center pt-3 border-t border-neutral-100">
+          <div className="mt-auto flex items-center pt-3 border-t border-border">
             <Avatar
               src={instructor.profileImage}
               name={instructor.name}
               size="sm"
             />
             <div className="ml-2">
-              <p className="text-sm font-medium">{instructor.name}</p>
+              <p className="text-sm font-medium text-card-foreground">{instructor.name}</p>
               <div className="flex items-center">
-                <span className="text-xs text-neutral-500">
+                <span className="text-xs text-muted-foreground">
                   ★ {instructor.rating} ({instructor.reviewCount})
                 </span>
               </div>
