@@ -183,8 +183,9 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                 </label>
                 <textarea
                   {...register('description', { required: 'Description is required' })}
-                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground"
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
                   rows={4}
+                  placeholder="Describe your class..."
                 />
                 {errors.description && (
                   <p className="mt-1 text-sm text-destructive">{errors.description.message}</p>
@@ -286,7 +287,7 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                   </label>
                   <select
                     {...register('type', { required: 'Class type is required' })}
-                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
                   >
                     <option value="group">Group Class</option>
                     <option value="personal">Personal Training</option>
@@ -302,7 +303,7 @@ export const CreateClassForm: React.FC<CreateClassFormProps> = ({ onClose }) => 
                   </label>
                   <select
                     {...register('level', { required: 'Skill level is required' })}
-                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
                   >
                     <option value="beginner">Beginner</option>
                     <option value="intermediate">Intermediate</option>

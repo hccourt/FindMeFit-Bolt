@@ -260,11 +260,11 @@ export const EditProfilePage: React.FC = () => {
                     value={formData.bio}
                     onChange={handleChange}
                     rows={4}
-                    className="block w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                    className="block w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
                     placeholder="Tell us about yourself..."
                   />
                   {errors.bio && (
-                    <p className="mt-1 text-sm text-error-500">{errors.bio}</p>
+                    <p className="mt-1 text-sm text-destructive">{errors.bio}</p>
                   )}
                 </div>
                 

@@ -87,7 +87,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ classId, isOpen, onClose }) =>
         isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >
-      <Card className="w-full max-w-lg relative z-[60]">
+      <Card className="w-full max-w-lg relative z-[60] bg-card">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Class Chat</CardTitle>
           <Button
@@ -143,7 +143,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ classId, isOpen, onClose }) =>
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 min-w-0 px-3 py-2 rounded-lg border border-input bg-background text-foreground"
+                className="flex-1 min-w-0 px-3 py-2 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20"
               />
               <Button
                 type="submit"

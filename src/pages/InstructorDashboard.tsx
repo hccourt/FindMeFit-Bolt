@@ -260,14 +260,14 @@ export const InstructorDashboard: React.FC = () => {
                       <label className="flex items-center">
                         <input
                           type="checkbox"
-                          className="form-checkbox h-4 w-4 text-primary-500"
+                          className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                         />
                         <span className="ml-2 text-sm">Group Classes</span>
                       </label>
                       <label className="flex items-center">
                         <input
                           type="checkbox"
-                          className="form-checkbox h-4 w-4 text-primary-500"
+                          className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                         />
                         <span className="ml-2 text-sm">Personal Training</span>
                       </label>
@@ -282,21 +282,21 @@ export const InstructorDashboard: React.FC = () => {
                       <label className="flex items-center">
                         <input
                           type="checkbox"
-                          className="form-checkbox h-4 w-4 text-primary-500"
+                          className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                         />
                         <span className="ml-2 text-sm">Upcoming</span>
                       </label>
                       <label className="flex items-center">
                         <input
                           type="checkbox"
-                          className="form-checkbox h-4 w-4 text-primary-500"
+                          className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                         />
                         <span className="ml-2 text-sm">Past</span>
                       </label>
                       <label className="flex items-center">
                         <input
                           type="checkbox"
-                          className="form-checkbox h-4 w-4 text-primary-500"
+                          className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                         />
                         <span className="ml-2 text-sm">Cancelled</span>
                       </label>

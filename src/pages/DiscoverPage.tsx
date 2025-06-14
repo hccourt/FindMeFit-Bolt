@@ -216,9 +216,9 @@ export const DiscoverPage: React.FC = () => {
                         id="type-group"
                         checked={filters.type.includes('group')}
                         onChange={() => toggleFilter('type', 'group')}
-                        className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-neutral-300 rounded"
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                       />
-                      <label htmlFor="type-group" className="ml-2 text-sm text-neutral-700">
+                      <label htmlFor="type-group" className="ml-2 text-sm text-foreground">
                         Group Classes
                       </label>
                     </div>
@@ -228,9 +228,9 @@ export const DiscoverPage: React.FC = () => {
                         id="type-personal"
                         checked={filters.type.includes('personal')}
                         onChange={() => toggleFilter('type', 'personal')}
-                        className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-neutral-300 rounded"
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                       />
-                      <label htmlFor="type-personal" className="ml-2 text-sm text-neutral-700">
+                      <label htmlFor="type-personal" className="ml-2 text-sm text-foreground">
                         Personal Training
                       </label>
                     </div>
@@ -246,9 +246,9 @@ export const DiscoverPage: React.FC = () => {
                         id="level-beginner"
                         checked={filters.level.includes('beginner')}
                         onChange={() => toggleFilter('level', 'beginner')}
-                        className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-neutral-300 rounded"
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                       />
-                      <label htmlFor="level-beginner" className="ml-2 text-sm text-neutral-700">
+                      <label htmlFor="level-beginner" className="ml-2 text-sm text-foreground">
                         Beginner
                       </label>
                     </div>
@@ -258,9 +258,9 @@ export const DiscoverPage: React.FC = () => {
                         id="level-intermediate"
                         checked={filters.level.includes('intermediate')}
                         onChange={() => toggleFilter('level', 'intermediate')}
-                        className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-neutral-300 rounded"
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                       />
-                      <label htmlFor="level-intermediate" className="ml-2 text-sm text-neutral-700">
+                      <label htmlFor="level-intermediate" className="ml-2 text-sm text-foreground">
                         Intermediate
                       </label>
                     </div>
@@ -270,9 +270,9 @@ export const DiscoverPage: React.FC = () => {
                         id="level-advanced"
                         checked={filters.level.includes('advanced')}
                         onChange={() => toggleFilter('level', 'advanced')}
-                        className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-neutral-300 rounded"
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                       />
-                      <label htmlFor="level-advanced" className="ml-2 text-sm text-neutral-700">
+                      <label htmlFor="level-advanced" className="ml-2 text-sm text-foreground">
                         Advanced
                       </label>
                     </div>
@@ -282,9 +282,9 @@ export const DiscoverPage: React.FC = () => {
                         id="level-all"
                         checked={filters.level.includes('all')}
                         onChange={() => toggleFilter('level', 'all')}
-                        className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-neutral-300 rounded"
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded bg-background"
                       />
-                      <label htmlFor="level-all" className="ml-2 text-sm text-neutral-700">
+                      <label htmlFor="level-all" className="ml-2 text-sm text-foreground">
                         All Levels
                       </label>
                     </div>
@@ -295,8 +295,8 @@ export const DiscoverPage: React.FC = () => {
                   <h4 className="font-medium mb-2">Price Range ({currentRegion.currency})</h4>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-neutral-700">{filters.price.min}</span>
-                      <span className="text-sm text-neutral-700">{filters.price.max}</span>
+                      <span className="text-sm text-foreground">{filters.price.min}</span>
+                      <span className="text-sm text-foreground">{filters.price.max}</span>
                     </div>
                     <div className="relative">
                       <input
@@ -307,7 +307,7 @@ export const DiscoverPage: React.FC = () => {
                         onChange={(e) =>
                           handlePriceChange(Number(e.target.value), filters.price.max)
                         }
-                        className="w-full appearance-none h-2 bg-neutral-200 rounded-full outline-none"
+                        className="w-full appearance-none h-2 bg-muted rounded-full outline-none"
                       />
                       <input
                         type="range"
@@ -317,7 +317,7 @@ export const DiscoverPage: React.FC = () => {
                         onChange={(e) =>
                           handlePriceChange(filters.price.min, Number(e.target.value))
                         }
-                        className="w-full appearance-none h-2 bg-neutral-200 rounded-full outline-none mt-2"
+                        className="w-full appearance-none h-2 bg-muted rounded-full outline-none mt-2"
                       />
                     </div>
                     <div className="flex justify-between">
@@ -329,9 +329,9 @@ export const DiscoverPage: React.FC = () => {
                         onChange={(e) =>
                           handlePriceChange(Number(e.target.value), filters.price.max)
                         }
-                        className="w-20 p-1 text-sm border border-neutral-300 rounded-md"
+                        className="w-20 p-1 text-sm border border-input rounded-md bg-background text-foreground"
                       />
-                      <span className="text-neutral-500">to</span>
+                      <span className="text-muted-foreground">to</span>
                       <input
                         type="number"
                         min={filters.price.min}
@@ -340,7 +340,7 @@ export const DiscoverPage: React.FC = () => {
                         onChange={(e) =>
                           handlePriceChange(filters.price.min, Number(e.target.value))
                         }
-                        className="w-20 p-1 text-sm border border-neutral-300 rounded-md"
+                        className="w-20 p-1 text-sm border border-input rounded-md bg-background text-foreground"
                       />
                     </div>
                   </div>

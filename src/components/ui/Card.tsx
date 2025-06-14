@@ -11,10 +11,10 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'rounded-xl overflow-hidden bg-white',
+          'rounded-xl overflow-hidden bg-card text-card-foreground',
           {
             'shadow-soft': variant === 'default',
-            'border border-neutral-200': variant === 'outline',
+            'border border-border': variant === 'outline',
           },
           className
         )}
@@ -37,7 +37,7 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
         className={cn(
           'p-6',
           {
-            'border-b border-neutral-200': withSeparator,
+            'border-b border-border': withSeparator,
           },
           className
         )}
@@ -55,7 +55,7 @@ export const CardTitle = React.forwardRef<
   return (
     <h3
       ref={ref}
-      className={cn('text-lg font-semibold leading-tight text-neutral-900', className)}
+      className={cn('text-lg font-semibold leading-tight text-card-foreground', className)}
       {...props}
     />
   );
@@ -69,7 +69,7 @@ export const CardDescription = React.forwardRef<
   return (
     <p
       ref={ref}
-      className={cn('text-sm text-neutral-500 mt-1', className)}
+      className={cn('text-sm text-muted-foreground mt-1', className)}
       {...props}
     />
   );
@@ -91,7 +91,7 @@ export const CardFooter = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn('px-6 py-4 bg-neutral-50', className)}
+      className={cn('px-6 py-4 bg-muted/50', className)}
       {...props}
     />
   );

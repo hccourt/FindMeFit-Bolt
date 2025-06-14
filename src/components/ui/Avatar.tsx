@@ -22,7 +22,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       <div
         ref={ref}
         className={cn(
-          'relative inline-flex items-center justify-center overflow-hidden rounded-full bg-neutral-200 text-neutral-900',
+          'relative inline-flex items-center justify-center overflow-hidden rounded-full bg-muted text-foreground',
           {
             'w-8 h-8 text-sm': size === 'sm',
             'w-10 h-10 text-base': size === 'md',
@@ -51,7 +51,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         {status && (
           <span
             className={cn(
-              'absolute right-0 bottom-0 block rounded-full ring-2 ring-white',
+              'absolute right-0 bottom-0 block rounded-full ring-2 ring-background',
               {
                 'bg-success-500': status === 'online',
                 'bg-neutral-400': status === 'offline',

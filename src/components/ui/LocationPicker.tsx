@@ -180,7 +180,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => 
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 rounded-full border border-input hover:shadow-md transition-all"
+        className="flex items-center gap-2 px-4 py-2 rounded-full border border-input hover:shadow-md transition-all bg-background text-foreground"
         title={currentLocation ? `${currentLocation.name}, ${currentLocation.parent?.name}` : 'Select location'}
       >
         <span className="text-lg">
@@ -227,7 +227,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => 
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-8 py-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input"
+                    className="w-full pl-9 pr-8 py-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input text-foreground"
                     placeholder="Search any location..."
                     autoFocus
                   />

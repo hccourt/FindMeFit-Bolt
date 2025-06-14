@@ -29,13 +29,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={cn(
-          'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none',
+          'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none',
           {
-            'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700': variant === 'primary',
-            'bg-secondary-500 text-white hover:bg-secondary-600 active:bg-secondary-700': variant === 'secondary',
-            'bg-white text-neutral-900 border border-neutral-300 hover:bg-neutral-100 active:bg-neutral-200': variant === 'outline',
-            'bg-transparent text-neutral-900 hover:bg-neutral-100 active:bg-neutral-200': variant === 'ghost',
-            'bg-transparent text-primary-500 hover:underline p-0 h-auto': variant === 'link',
+            'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80': variant === 'primary',
+            'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70': variant === 'secondary',
+            'bg-background text-foreground border border-input hover:bg-accent hover:text-accent-foreground active:bg-accent/80': variant === 'outline',
+            'bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent/80': variant === 'ghost',
+            'bg-transparent text-primary hover:underline p-0 h-auto': variant === 'link',
             'bg-error-500 text-white hover:bg-error-600 active:bg-error-700': variant === 'danger',
             'text-sm px-3 py-1.5 h-8': size === 'sm',
             'text-base px-4 py-2 h-10': size === 'md',

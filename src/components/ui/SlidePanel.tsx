@@ -25,7 +25,7 @@ export const SlidePanel: React.FC<SlidePanelProps> = ({
       {/* Backdrop */}
       <div
         className={cn(
-          'absolute inset-0 bg-neutral-900/20 backdrop-blur-sm transition-opacity duration-300',
+          'absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300',
           isOpen ? 'opacity-100' : 'opacity-0'
         )}
         onClick={onClose}
@@ -34,7 +34,7 @@ export const SlidePanel: React.FC<SlidePanelProps> = ({
       {/* Panel */}
       <div
         className={cn(
-          'absolute inset-y-0 w-full max-w-sm bg-background shadow-xl transition-transform duration-300 ease-in-out',
+          'absolute inset-y-0 w-full max-w-sm bg-background shadow-xl transition-transform duration-300 ease-in-out border-l border-border',
           side === 'right' ? 'right-0' : 'left-0',
           isOpen
             ? 'translate-x-0'
@@ -46,7 +46,7 @@ export const SlidePanel: React.FC<SlidePanelProps> = ({
         <div className="absolute right-4 top-4">
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-neutral-500 hover:bg-neutral-100"
+            className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <X className="h-5 w-5" />
           </button>
