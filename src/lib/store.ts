@@ -137,7 +137,7 @@ export const useClassStore = create<ClassState>()(
           throw new Error('Region not properly configured');
         }
 
-        // Get all classes with real-time participant counts from bookings (force fresh data)
+        // Get all classes
         const { data: classesData, error: classesError } = await supabase
           .from('classes')
           .select(`
@@ -177,22 +177,19 @@ export const useClassStore = create<ClassState>()(
         if (classesError) throw classesError;
         console.log('📚 Classes fetched:', classesData?.length || 0);
         
-        // Get ALL confirmed bookings to calculate participant counts (force fresh data)
-        const { data: allBookings, error: allBookingsError } = await supabase
-          .from('bookings')
-          .select('class_id, user_id')
-          .eq('status', 'confirmed')
-          .order('created_at', { ascending: false });
+        // Get participant counts using the secure function
+        const { data: participantCounts, error: participantCountsError } = await supabase
+          .rpc('get_all_class_participant_counts');
         
-        if (allBookingsError) throw allBookingsError;
-        console.log('📋 All confirmed bookings:', allBookings?.length || 0, allBookings);
+        if (participantCountsError) throw participantCountsError;
+        console.log('👥 Participant counts from function:', participantCounts);
         
-        // Create a map of class_id to participant count
-        const participantCounts: Record<string, number> = {};
-        (allBookings || []).forEach(booking => {
-          participantCounts[booking.class_id] = (participantCounts[booking.class_id] || 0) + 1;
+        // Create a map of class_id to participant count from the function result
+        const participantCountsMap: Record<string, number> = {};
+        (participantCounts || []).forEach(item => {
+          participantCountsMap[item.class_id] = item.participant_count;
         });
-        console.log('👥 Participant counts by class:', participantCounts);
+        console.log('👥 Participant counts map:', participantCountsMap);
         
         // Filter classes by region bounds before processing
         const filteredClassesData = classesData.filter(item => {
@@ -249,8 +246,8 @@ export const useClassStore = create<ClassState>()(
           const userBooking = userBookings.find(b => b.class_id === item.id);
           const isBooked = !!userBooking;
           
-          // Always use the real-time participant count from bookings
-          const actualParticipants = participantCounts[item.id] || 0;
+          // Use the participant count from the secure function
+          const actualParticipants = participantCountsMap[item.id] || 0;
           
           console.log(`🎯 Class "${item.title}" (${item.id}):`, {
             actualParticipants,
