@@ -34,7 +34,7 @@ export const Hero: React.FC = () => {
           
           <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/90 text-primary-600 mb-3">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary border border-primary/20 mb-3">
                 <User size={24} />
               </div>
               <p className="font-semibold text-foreground">500+</p>
@@ -42,7 +42,7 @@ export const Hero: React.FC = () => {
             </div>
             
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/90 text-primary-600 mb-3">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary border border-primary/20 mb-3">
                 <Calendar size={24} />
               </div>
               <p className="font-semibold text-foreground">1,000+</p>
@@ -50,7 +50,7 @@ export const Hero: React.FC = () => {
             </div>
             
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/90 text-primary-600 mb-3">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary border border-primary/20 mb-3">
                 <MapPin size={24} />
               </div>
               <p className="font-semibold text-foreground">50+</p>
