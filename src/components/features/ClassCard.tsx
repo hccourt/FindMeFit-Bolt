@@ -6,14 +6,14 @@ import { Badge } from '../ui/Badge';
 import { Avatar } from '../ui/Avatar';
 import { formatCurrency, formatDate, formatTime } from '../../lib/utils';
 import { Class } from '../../lib/types';
-import { useRegionStore } from '../../lib/store';
+import { useLocationStore } from '../../lib/store';
 
 interface ClassCardProps {
   classItem: Class;
 }
 
 export const ClassCard: React.FC<ClassCardProps> = ({ classItem }) => {
-  const { currentRegion } = useRegionStore();
+  const { regionSettings: currentRegion } = useLocationStore();
   
   const {
     id,
