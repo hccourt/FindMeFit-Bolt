@@ -69,7 +69,7 @@ export const NotificationCenter: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6">
+      <div className="p-0">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-foreground">Notifications</h3>
         </div>
@@ -85,7 +85,7 @@ export const NotificationCenter: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-0">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-semibold text-foreground">Notifications</h3>
