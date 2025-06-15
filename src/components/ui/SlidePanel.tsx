@@ -34,7 +34,8 @@ export const SlidePanel: React.FC<SlidePanelProps> = ({
       {/* Panel */}
       <div
         className={cn(
-          'absolute inset-y-0 w-full max-w-sm bg-background shadow-xl transition-transform duration-300 ease-in-out border-l border-border',
+          'absolute inset-y-0 w-full bg-background shadow-xl transition-transform duration-300 ease-in-out border-l border-border',
+          'sm:max-w-sm',
           side === 'right' ? 'right-0' : 'left-0',
           isOpen
             ? 'translate-x-0'

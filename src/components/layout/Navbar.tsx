@@ -230,12 +230,11 @@ export const Navbar: React.FC = () => {
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               <div className="relative">
-                {/* Always show badge for anonymous users (unreadCount will be 1 for welcome notification) */}
                 {(unreadCount > 0 || !isAuthenticated) && (
                   <Badge 
                     variant="warning" 
                     size="sm" 
-                    className="absolute -top-2 -right-2 min-w-[1.25rem] h-5 text-xs flex items-center justify-center p-0 z-[10]"
+                    className="absolute -top-2 -right-2 min-w-[1.25rem] h-5 text-xs flex items-center justify-center p-0 z-[10] rounded-full"
                   >
                     {!isAuthenticated ? '1' : unreadCount > 99 ? '99+' : unreadCount}
                   </Badge>
