@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, MapPin } from 'lucide-react';
+import { Mail, Lock, User, MapPin, Eye, EyeOff } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { Container } from '../../components/ui/Container';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/Card';
@@ -131,6 +131,7 @@ export const SignupPage: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   error={errors.password}
                   leftIcon={<Lock size={18} />}
+                  showPasswordToggle
                 />
                 
                 <Input
@@ -141,6 +142,7 @@ export const SignupPage: React.FC = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   error={errors.confirmPassword}
                   leftIcon={<Lock size={18} />}
+                  showPasswordToggle
                 />
                 
                 <div>

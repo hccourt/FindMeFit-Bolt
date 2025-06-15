@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, MapPin } from 'lucide-react';
+import { Mail, Lock, MapPin, Eye, EyeOff } from 'lucide-react';
 import { Layout } from '../../components/layout/Layout';
 import { Container } from '../../components/ui/Container';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/Card';
@@ -97,6 +97,7 @@ export const LoginPage: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   error={errors.password}
                   leftIcon={<Lock size={18} />}
+                  showPasswordToggle
                 />
                 
                 <div className="flex items-center justify-between">
