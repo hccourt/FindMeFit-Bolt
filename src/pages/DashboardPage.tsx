@@ -6,13 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { Avatar } from '../components/ui/Avatar';
 import { Calendar, Clock, MapPin, User, Mail, Phone, Calendar as JoinedIcon } from 'lucide-react';
-import { useAuthStore, useClassStore, useRegionStore } from '../lib/store';
+import { useAuthStore, useClassStore, useLocationStore } from '../lib/store';
 import { formatDate, formatTime } from '../lib/utils';
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuthStore();
   const { bookings, classes, fetchBookings, fetchClasses, isLoading } = useClassStore();
-  const { currentRegion } = useRegionStore();
+  const { regionSettings: currentRegion } = useLocationStore();
 
   // Ensure we have both classes and bookings loaded
   React.useEffect(() => {
