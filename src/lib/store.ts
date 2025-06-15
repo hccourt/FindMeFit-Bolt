@@ -641,5 +641,3 @@ export const useNotificationStore = create<NotificationState>()(
     }
   }))
 );
-
-export { useAuthStore }
