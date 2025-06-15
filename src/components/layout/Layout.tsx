@@ -12,10 +12,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, hideFooter = false }) 
   const { isDarkMode } = useThemeStore();
   
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <div className="pt-20">
+    <div className="flex flex-col min-h-screen bg-background text-foreground relative">
+      <div className="relative z-0">
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 relative z-0">{children}</main>
         {!hideFooter && <Footer />}
       </div>
     </div>

@@ -23,11 +23,11 @@ export const Navbar: React.FC = () => {
   const { unreadCount, subscribeToNotifications } = useNotificationStore();
   
   React.useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user?.id) {
       const unsubscribe = subscribeToNotifications();
       return unsubscribe;
     }
-  }, [isAuthenticated, user, subscribeToNotifications]);
+  }, [isAuthenticated, user?.id, subscribeToNotifications]);
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
@@ -77,7 +77,7 @@ export const Navbar: React.FC = () => {
       icon: <User className="h-5 w-5" />,
       text: 'Profile Settings',
       to: `/profile/${user?.id}`,
-      visible: isAuthenticated
+      visible: isAuthenticated && !!user?.id
     },
     {
       id: 'theme',
@@ -93,13 +93,13 @@ export const Navbar: React.FC = () => {
       <div className="space-y-3 flex-1 overflow-y-auto">
         <div className="px-2 pt-2">
           <div className="flex items-center space-x-3 text-foreground">
-            <Avatar name={isAuthenticated ? user?.name : 'Anonymous User'} size="lg" />
+            <Avatar name={isAuthenticated ? user?.name || 'User' : 'Anonymous User'} size="lg" />
             <div>
               <h3 className="font-semibold text-lg">
-                {isAuthenticated ? user?.name : 'Anonymous User'}
+                {isAuthenticated ? user?.name || 'User' : 'Anonymous User'}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {isAuthenticated ? user?.email : 'Sign in to access all features'}
+                {isAuthenticated ? user?.email || '' : 'Sign in to access all features'}
               </p>
             </div>
           </div>
@@ -118,7 +118,7 @@ export const Navbar: React.FC = () => {
           areButtonsCollapsed ? "pb-0" : "pb-3"
         )}>
           <div className="flex items-center justify-between px-1 mb-2">
-            <LocationPicker />
+            <LocationPicker modal />
             <button
               onClick={toggleButtonsCollapse}
               className="p-2 rounded-full hover:bg-muted transition-colors"
@@ -239,7 +239,7 @@ export const Navbar: React.FC = () => {
                     {!isAuthenticated ? '1' : unreadCount > 99 ? '99+' : unreadCount}
                   </Badge>
                 )}
-                <Avatar src={user?.profileImage} name={isAuthenticated ? user?.name : 'Anonymous User'} size="sm" />
+                <Avatar src={user?.profileImage} name={isAuthenticated ? user?.name || 'User' : 'Anonymous User'} size="sm" />
               </div>
             </button>
           </div>

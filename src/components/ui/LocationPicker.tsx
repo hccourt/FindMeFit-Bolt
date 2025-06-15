@@ -5,9 +5,11 @@ import { Location } from '../../lib/types';
 import { Map } from './Map';
 import { useLocationStore, useRegionStore, useAuthStore, useClassStore } from '../../lib/store';
 import { Button } from './Button';
+import { Dialog } from './Dialog';
 
 interface LocationPickerProps {
   className?: string;
+  modal?: boolean;
 }
 
 const getCountryFlag = (countryCode: string): string => {
@@ -17,7 +19,7 @@ const getCountryFlag = (countryCode: string): string => {
   return String.fromCodePoint(first + offset, second + offset);
 };
 
-export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => {
+export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal = false }) => {
   const { currentLocation, recentLocations, setLocation, searchLocations } = useLocationStore();
   const { currentRegion } = useRegionStore();
   const { user, updateProfile } = useAuthStore();
@@ -58,14 +60,12 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => 
   const handleLocationSelect = (location: Location) => {
     setLocation(location);
     
-    // Get the country from the parent location name
     let country = '';
     if (location.parent?.name) {
       const parts = location.parent.name.split(', ');
       country = parts[parts.length - 1];
     }
     
-    // Map countries to regions
     const countryToRegion: Record<string, string> = {
       'United Kingdom': 'gb',
       'United States': 'us',
@@ -92,19 +92,16 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => 
       'Thailand': 'th',
     };
     
-    // Set the region based on the country
     const regionId = country && countryToRegion[country];
     if (regionId) {
       const regionStore = useRegionStore.getState();
       regionStore.setRegion(regionId);
       
-      // Ensure we have the updated region before fetching classes
       setTimeout(() => {
         useClassStore.getState().fetchClasses();
       }, 0);
     }
     
-    // Show save prompt if user is logged in and doesn't have a location set
     if (user && !user.location) {
       setShowSavePrompt(true);
     } else {
@@ -175,6 +172,123 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => 
   
   const displayedLocations = searchTerm.length >= 2 ? searchResults : recentLocations;
   
+  const pickerContent = (
+    <>
+      {showSavePrompt ? (
+        <div className="p-4">
+          <h3 className="text-lg font-semibold mb-2">Save Location?</h3>
+          <p className="text-muted-foreground text-sm mb-4">
+            Would you like to save {currentLocation?.name} as your default location?
+          </p>
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowSavePrompt(false);
+                setIsOpen(false);
+              }}
+            >
+              No, thanks
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSaveLocation}
+            >
+              Yes, save it
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="p-2 border-b border-border">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-8 py-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input text-foreground"
+                placeholder="Search any location..."
+                autoFocus
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSearchResults([]);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
+          
+          <div className="h-64">
+            <Map
+              locations={displayedLocations}
+              onLocationSelect={handleLocationSelect}
+              center={currentLocation?.coordinates ? 
+                [currentLocation.coordinates.latitude, currentLocation.coordinates.longitude] :
+                [51.5074, -0.1278]
+              }
+              zoom={currentLocation ? 12 : 6}
+              height="100%"
+            />
+          </div>
+          
+          <div className="max-h-48 overflow-auto p-1 border-t border-border">
+            {isSearching ? (
+              <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
+                Searching...
+              </div>
+            ) : displayedLocations.length > 0 ? (
+              <div className="space-y-1">
+                {searchTerm.length < 2 && recentLocations.length > 0 && (
+                  <div className="px-3 py-1 text-xs font-medium text-muted-foreground uppercase">
+                    Recent Locations
+                  </div>
+                )}
+                {displayedLocations.map(location => (
+                  <button
+                    key={location.id}
+                    onClick={() => handleLocationSelect(location)}
+                    className={cn(
+                      "flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-muted",
+                      currentLocation?.id === location.id && "bg-primary/10 text-primary"
+                    )}
+                  >
+                    <span className="mr-2 text-xl leading-none">
+                      {getCountryFlag(getLocationCountryCode(location))}
+                    </span>
+                    <div className="text-left truncate">
+                      <div className="font-medium truncate">{location.name}</div>
+                      {location.parent && (
+                        <div className="text-xs text-muted-foreground truncate">
+                          {location.parent.name}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : searchTerm.length >= 2 ? (
+              <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
+                No locations found
+              </div>
+            ) : (
+              <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
+                Type to search for any location
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </>
+  );
+
   return (
     <div ref={wrapperRef} className={cn('relative', className)}>
       <button
@@ -191,120 +305,21 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => 
         </span>
       </button>
       
-      {isOpen && (
+      {isOpen && modal ? (
+        <Dialog
+          isOpen={isOpen}
+          onClose={() => {
+            setIsOpen(false);
+            setShowSavePrompt(false);
+          }}
+          title="Select Location"
+          size="lg"
+        >
+          {pickerContent}
+        </Dialog>
+      ) : isOpen && (
         <div className="absolute z-50 w-96 mt-2 bg-card border border-border rounded-lg shadow-lg">
-          {showSavePrompt ? (
-            <div className="p-4">
-              <h3 className="text-lg font-semibold mb-2">Save Location?</h3>
-              <p className="text-muted-foreground text-sm mb-4">
-                Would you like to save {currentLocation?.name} as your default location?
-              </p>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setShowSavePrompt(false);
-                    setIsOpen(false);
-                  }}
-                >
-                  No, thanks
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSaveLocation}
-                >
-                  Yes, save it
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="p-2 border-b border-border">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-8 py-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input text-foreground"
-                    placeholder="Search any location..."
-                    autoFocus
-                  />
-                  {searchTerm && (
-                    <button
-                      onClick={() => {
-                        setSearchTerm('');
-                        setSearchResults([]);
-                      }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-              
-              <div className="h-64">
-                <Map
-                  locations={displayedLocations}
-                  onLocationSelect={handleLocationSelect}
-                  center={currentLocation?.coordinates ? 
-                    [currentLocation.coordinates.latitude, currentLocation.coordinates.longitude] :
-                    [51.5074, -0.1278]
-                  }
-                  zoom={currentLocation ? 12 : 6}
-                  height="100%"
-                />
-              </div>
-              
-              <div className="max-h-48 overflow-auto p-1 border-t border-border">
-                {isSearching ? (
-                  <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
-                    Searching...
-                  </div>
-                ) : displayedLocations.length > 0 ? (
-                  <div className="space-y-1">
-                    {searchTerm.length < 2 && recentLocations.length > 0 && (
-                      <div className="px-3 py-1 text-xs font-medium text-muted-foreground uppercase">
-                        Recent Locations
-                      </div>
-                    )}
-                    {displayedLocations.map(location => (
-                      <button
-                        key={location.id}
-                        onClick={() => handleLocationSelect(location)}
-                        className={cn(
-                          "flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-muted",
-                          currentLocation?.id === location.id && "bg-primary/10 text-primary"
-                        )}
-                      >
-                        <span className="mr-2 text-xl leading-none">
-                          {getCountryFlag(getLocationCountryCode(location))}
-                        </span>
-                        <div className="text-left truncate">
-                          <div className="font-medium truncate">{location.name}</div>
-                          {location.parent && (
-                            <div className="text-xs text-muted-foreground truncate">
-                              {location.parent.name}
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                ) : searchTerm.length >= 2 ? (
-                  <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
-                    No locations found
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
-                    Type to search for any location
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+          {pickerContent}
         </div>
       )}
     </div>
