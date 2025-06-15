@@ -241,11 +241,7 @@ export const Navbar: React.FC = () => {
       {/* User Panel */}
       <SlidePanel isOpen={isUserPanelOpen} onClose={() => setIsUserPanelOpen(false)}>
         <div className="space-y-6">
-          {/* Notifications Section */}
-          <div className="border-b border-border pb-6">
-            <NotificationCenter />
-          </div>
-          
+
           {/* User Profile Section */}
           <div className="flex items-center space-x-4 text-foreground">
             <Avatar src={user?.profileImage} name={user?.name} size="lg" />
@@ -254,8 +250,13 @@ export const Navbar: React.FC = () => {
               <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
           </div>
-          
           <div className="border-t border-border -mx-6 px-6 py-4">
+
+          {/* Notifications Section */}
+          <div className="border-b border-border pb-6 mb-6">
+            <NotificationCenter />
+          </div>
+                   
             <div className="space-y-3">
               {user?.role === 'instructor' && (
                 <Link
