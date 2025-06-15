@@ -3,15 +3,17 @@ import { cn } from '../../lib/utils';
 
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  padded?: boolean;
 }
 
 export const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
-  ({ className, size = 'xl', ...props }, ref) => {
+  ({ className, size = 'xl', padded = true, ...props }, ref) => {
     return (
       <div
         ref={ref}
         className={cn(
-          'mx-auto px-4 sm:px-6 w-full',
+          'mx-auto w-full',
+          padded && 'px-4 sm:px-6',
           {
             'max-w-screen-sm': size === 'sm',
             'max-w-screen-md': size === 'md',

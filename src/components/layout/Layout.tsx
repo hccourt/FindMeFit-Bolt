@@ -14,7 +14,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, hideFooter = false }) 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Navbar />
-      <main className="flex-1 pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 pt-20 pb-8">
         {children}
       </main>
       {!hideFooter && <Footer />}
