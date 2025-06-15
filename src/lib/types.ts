@@ -114,3 +114,34 @@ export interface Booking {
   created_at?: string;
   updated_at?: string;
 }
+
+export type NotificationType = 
+  | 'booking_confirmed'
+  | 'booking_cancelled'
+  | 'class_cancelled'
+  | 'class_updated'
+  | 'new_message'
+  | 'payment_received'
+  | 'review_received'
+  | 'class_reminder'
+  | 'system_announcement';
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  data: Record<string, any>;
+  read: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Toast {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  duration?: number;
+}

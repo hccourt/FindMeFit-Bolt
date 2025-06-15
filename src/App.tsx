@@ -21,6 +21,7 @@ import { CookiesPage } from './pages/CookiesPage'
 import { useAuthStore } from './lib/store'
 import { useScrollToTop } from './lib/hooks'
 import { useThemeStore } from './lib/store'
+import { ToastContainer } from './components/ui/ToastContainer'
 
 function ScrollToTop() {
   useScrollToTop()
@@ -63,6 +64,7 @@ function App() {
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/cookies" element={<CookiesPage />} />
         </Routes>
+        <ToastContainer />
       </div>
     </Router>
   )

@@ -3,11 +3,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, User, LogOut, Calendar, Search, Sun, Moon, Home, Settings, BookOpen } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Container } from '../ui/Container';
-import { useAuthStore, useThemeStore } from '../../lib/store';
+import { useAuthStore, useThemeStore, useNotificationStore } from '../../lib/store';
 import { Avatar } from '../ui/Avatar';
 import { Logo } from '../ui/Logo';
 import { SlidePanel } from '../ui/SlidePanel';
 import { LocationPicker } from '../ui/LocationPicker';
+import { NotificationCenter } from '../features/NotificationCenter';
+import { Badge } from '../ui/Badge';
 import { supabase } from '../../lib/supabase';
 
 export const Navbar: React.FC = () => {
@@ -17,6 +19,15 @@ export const Navbar: React.FC = () => {
   const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuthStore();
   const { isDarkMode, toggleDarkMode } = useThemeStore();
+  const { unreadCount, subscribeToNotifications } = useNotificationStore();
+  
+  // Subscribe to real-time notifications
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      const unsubscribe = subscribeToNotifications();
+      return unsubscribe;
+    }
+  }, [isAuthenticated, user, subscribeToNotifications]);
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
@@ -74,7 +85,18 @@ export const Navbar: React.FC = () => {
                 onClick={() => setIsUserPanelOpen(true)}
               >
                 <Menu className="h-4 w-4" />
+                <div className="relative">
+                  {unreadCount > 0 && (
+                    <Badge 
+                      variant="error" 
+                      size="sm" 
+                      className="absolute -top-2 -right-2 min-w-[1.25rem] h-5 text-xs flex items-center justify-center p-0"
+                    >
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Badge>
+                  )}
                 <Avatar src={user?.profileImage} name={user?.name} size="sm" />
+                </div>
               </button>
             ) : (
               <>
@@ -219,6 +241,12 @@ export const Navbar: React.FC = () => {
       {/* User Panel */}
       <SlidePanel isOpen={isUserPanelOpen} onClose={() => setIsUserPanelOpen(false)}>
         <div className="space-y-6">
+          {/* Notifications Section */}
+          <div className="border-b border-border pb-6">
+            <NotificationCenter />
+          </div>
+          
+          {/* User Profile Section */}
           <div className="flex items-center space-x-4 text-foreground">
             <Avatar src={user?.profileImage} name={user?.name} size="lg" />
             <div>
