@@ -253,10 +253,11 @@ export const Navbar: React.FC = () => {
           <div className="border-t border-border -mx-6 px-6 py-4">
 
           {/* Notifications Section */}
-          <div className="border-b border-border pb-6">
+          <div className="border-b border-border pb-6 mb-3">
             <NotificationCenter />
           </div>
-          
+
+            
             <div className="space-y-3">
               {user?.role === 'instructor' && (
                 <Link
