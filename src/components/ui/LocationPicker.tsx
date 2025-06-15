@@ -3,7 +3,7 @@ import { MapPin, Search, X, Clock } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Location } from '../../lib/types';
 import { Map } from './Map';
-import { useLocationStore, useRegionStore, useAuthStore, useClassStore } from '../../lib/store';
+import { useLocationStore, useAuthStore, useClassStore } from '../../lib/store';
 import { Button } from './Button';
 
 interface LocationPickerProps {
@@ -19,7 +19,7 @@ const getCountryFlag = (countryCode: string): string => {
 
 export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => {
   const { currentLocation, recentLocations, setLocation, searchLocations } = useLocationStore();
-  const { currentRegion } = useRegionStore();
+  const { regionSettings: currentRegion } = useLocationStore();
   const { user, updateProfile } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,8 +95,8 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className }) => 
     // Set the region based on the country
     const regionId = country && countryToRegion[country];
     if (regionId) {
-      const regionStore = useRegionStore.getState();
-      regionStore.setRegion(regionId);
+      const locationStore = useLocationStore.getState();
+      locationStore.setRegion(regionId);
       
       // Ensure we have the updated region before fetching classes
       setTimeout(() => {
