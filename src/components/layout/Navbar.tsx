@@ -88,9 +88,9 @@ export const Navbar: React.FC = () => {
                 <div className="relative">
                   {unreadCount > 0 && (
                     <Badge 
-                      variant="error" 
+                      variant="warning" 
                       size="sm" 
-                      className="absolute -top-2 -right-2 min-w-[1.25rem] h-5 text-xs flex items-center justify-center p-0"
+                      className="absolute -top-2 -right-2 min-w-[1.25rem] h-5 text-xs flex items-center justify-center p-0 z-[10]"
                     >
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </Badge>
