@@ -15,7 +15,7 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
           'inline-flex items-center justify-center rounded-full font-medium',
           {
             'bg-muted text-muted-foreground': variant === 'default',
-            'bg-primary text-primary-foreground': variant === 'primary',
+            'bg-primary text-white-foreground': variant === 'primary',
             'bg-secondary text-secondary-foreground': variant === 'secondary',
             'bg-background text-foreground border border-border': variant === 'outline',
             'bg-success-100 text-success-900 dark:bg-success-900/20 dark:text-success-300': variant === 'success',
