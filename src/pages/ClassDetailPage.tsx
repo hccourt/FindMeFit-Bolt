@@ -9,7 +9,7 @@ import { Badge } from '../components/ui/Badge';
 import { Card, CardContent } from '../components/ui/Card';
 import { Map } from '../components/ui/Map';
 import { ChatBox } from '../components/features/ChatBox';
-import { useAuthStore, useClassStore, useRegionStore } from '../lib/store';
+import { useAuthStore, useClassStore, useLocationStore } from '../lib/store';
 import { formatCurrency, formatDate, formatTime } from '../lib/utils';
 import { Class } from '../lib/types';
 
@@ -18,7 +18,7 @@ export const ClassDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuthStore();
   const { classes, isLoading, fetchClasses, forceRefreshClasses, bookClass } = useClassStore();
-  const { currentRegion } = useRegionStore();
+  const { regionSettings: currentRegion } = useLocationStore();
   
   const [classItem, setClassItem] = useState<Class | null>(null);
   const [isBooking, setIsBooking] = useState(false);
