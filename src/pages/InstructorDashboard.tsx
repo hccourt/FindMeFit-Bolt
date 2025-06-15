@@ -8,14 +8,14 @@ import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
 import { Calendar, Clock, MapPin, Plus, Users, Search } from 'lucide-react';
 import { CreateClassForm } from '../components/features/CreateClassForm';
-import { useAuthStore, useClassStore, useRegionStore } from '../lib/store';
+import { useAuthStore, useClassStore, useLocationStore } from '../lib/store';
 import { formatCurrency, formatDate, formatTime } from '../lib/utils';
 import { Class } from '../lib/types';
 
 export const InstructorDashboard: React.FC = () => {
   const { user } = useAuthStore();
   const { classes, isLoading, fetchClasses } = useClassStore();
-  const { currentRegion } = useRegionStore();
+  const { regionSettings: currentRegion } = useLocationStore();
   const [showNewClassForm, setShowNewClassForm] = useState(false);
   
   React.useEffect(() => {

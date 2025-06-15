@@ -6,12 +6,12 @@ import { Container } from '../components/ui/Container';
 import { Button } from '../components/ui/Button';
 import { ClassCard } from '../components/features/ClassCard';
 import { Hero } from '../components/features/Hero';
-import { useClassStore, useRegionStore, useLocationStore } from '../lib/store';
+import { useClassStore, useLocationStore } from '../lib/store';
 import { isCoordinateInRegion } from '../lib/utils';
 
 export const HomePage: React.FC = () => {
   const { classes, fetchClasses, isLoading } = useClassStore();
-  const { currentRegion } = useRegionStore();
+  const { regionSettings: currentRegion } = useLocationStore();
   const { currentLocation } = useLocationStore();
   
   useEffect(() => {

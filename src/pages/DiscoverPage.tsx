@@ -6,13 +6,13 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Filter, Search, X } from 'lucide-react';
-import { useClassStore, useRegionStore, useLocationStore } from '../lib/store';
+import { useClassStore, useLocationStore } from '../lib/store';
 import { Class } from '../lib/types';
 import { isCoordinateInRegion } from '../lib/utils';
 
 export const DiscoverPage: React.FC = () => {
   const { classes, fetchClasses, isLoading } = useClassStore();
-  const { currentRegion } = useRegionStore();
+  const { regionSettings: currentRegion } = useLocationStore();
   const { currentLocation } = useLocationStore();
   
   const [searchTerm, setSearchTerm] = useState('');
