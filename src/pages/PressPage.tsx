@@ -63,7 +63,7 @@ const mediaContacts = [
   {
     name: "Sarah Thompson",
     title: "Head of Operations & Media Relations",
-    email: "press@findmefit.com",
+    email: "press@findme.fit",
     phone: "01865 842 156"
   }
 ];
@@ -235,7 +235,7 @@ export const PressPage: React.FC = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Website:</span>
-                      <span className="text-foreground font-medium">findmefit.com</span>
+                      <span className="text-foreground font-medium">findme.fit</span>
                     </div>
                   </div>
                 </div>

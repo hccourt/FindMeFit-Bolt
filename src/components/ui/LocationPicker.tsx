@@ -201,7 +201,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal
         </div>
       ) : (
         <>
-          <div className="py-2 border-b border-border">
+          <div className="py-4 border-b border-border">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
@@ -247,7 +247,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal
             ) : displayedLocations.length > 0 ? (
               <div className="space-y-1">
                 {searchTerm.length < 2 && recentLocations.length > 0 && (
-                  <div className="px-3 py-1 text-xs font-medium text-muted-foreground uppercase">
+                  <div className="px-2 py-3 text-xs font-medium text-muted-foreground uppercase">
                     Recent Locations
                   </div>
                 )}
@@ -256,7 +256,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal
                     key={location.id}
                     onClick={() => handleLocationSelect(location)}
                     className={cn(
-                      "flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-muted",
+                      "flex items-center w-full px-3 py-3 text-sm rounded-md hover:bg-muted",
                       currentLocation?.id === location.id && "bg-primary/10 text-primary"
                     )}
                   >

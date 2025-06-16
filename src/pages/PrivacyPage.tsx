@@ -196,7 +196,7 @@ export const PrivacyPage: React.FC = () => {
                   </p>
                   <div className="p-4 bg-muted rounded-lg">
                     <p className="text-foreground font-medium">Data Protection Officer</p>
-                    <p className="text-muted-foreground">Email: privacy@findmefit.com</p>
+                    <p className="text-muted-foreground">Email: privacy@findme.fit</p>
                     <p className="text-muted-foreground">Phone: 01865 842 156</p>
                     <p className="text-muted-foreground">Address: 45 High Street, Kidlington, Oxfordshire OX5 2DH</p>
                   </div>

@@ -181,7 +181,7 @@ export const TermsPage: React.FC = () => {
                   </p>
                   <div className="mt-4 p-4 bg-muted rounded-lg">
                     <p className="text-foreground font-medium">FindMeFit Support</p>
-                    <p className="text-muted-foreground">Email: legal@findmefit.com</p>
+                    <p className="text-muted-foreground">Email: legal@findme.fit</p>
                     <p className="text-muted-foreground">Phone: 01865 842 156</p>
                     <p className="text-muted-foreground">Address: 45 High Street, Kidlington, Oxfordshire OX5 2DH</p>
                   </div>
