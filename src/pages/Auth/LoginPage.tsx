@@ -61,7 +61,7 @@ export const LoginPage: React.FC = () => {
   
   return (
     <Layout hideFooter>
-      <Container size="sm" className="py-12 md:py-16">
+      <Container size="sm" className="py-6 md:py-16">
                 
         <Card>
           <CardHeader>
