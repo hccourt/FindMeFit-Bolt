@@ -234,7 +234,7 @@ export const Navbar: React.FC = () => {
                   <Badge 
                     variant="warning" 
                     size="sm" 
-                    className="absolute -top-2 -right-2 min-w-[1.25rem] h-5 text-xs flex items-center justify-center p-0 z-[10] rounded-full"
+                    className="absolute -top-2 -right-2 min-w-[1.25rem] w-5 h-5 text-xs flex items-center justify-center p-0 z-[10] rounded-full"
                   >
                     {!isAuthenticated ? '1' : unreadCount > 99 ? '99+' : unreadCount}
                   </Badge>
