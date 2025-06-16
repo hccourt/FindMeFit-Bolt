@@ -201,7 +201,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal
         </div>
       ) : (
         <>
-          <div className="p-2 border-b border-border">
+          <div className="py-2 border-b border-border">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
@@ -209,7 +209,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-8 py-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input text-foreground"
-                placeholder="Search any location..."
+                placeholder="Search for your location..."
                 autoFocus
               />
               {searchTerm && (
@@ -226,7 +226,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal
             </div>
           </div>
           
-          <div className="h-64">
+          <div className="h-80">
             <Map
               locations={displayedLocations}
               onLocationSelect={handleLocationSelect}
@@ -239,7 +239,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal
             />
           </div>
           
-          <div className="max-h-48 overflow-auto p-1 border-t border-border">
+          <div className="max-h-100 overflow-auto p-1 border-t border-border">
             {isSearching ? (
               <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
                 Searching...

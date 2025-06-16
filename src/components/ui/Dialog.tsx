@@ -38,7 +38,7 @@ export const Dialog: React.FC<DialogProps> = ({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <div
           className={cn(
-            'relative bg-card rounded-lg shadow-xl w-full',
+            'relative bg-card rounded-lg shadow-xl w-full p-6 h-full',
             sizeClasses[size]
           )}
           onClick={(e) => e.stopPropagation()}
@@ -46,7 +46,7 @@ export const Dialog: React.FC<DialogProps> = ({
           {/* Header */}
           <div className="relative">
             {title && (
-              <div className="px-6 pt-6 pb-4 border-b border-border">
+              <div className="pt-2 pb-6 border-b border-border">
                 <h3 className="text-lg font-semibold leading-6 text-foreground">
                   {title}
                 </h3>
@@ -54,7 +54,7 @@ export const Dialog: React.FC<DialogProps> = ({
             )}
             <button
               type="button"
-              className="absolute right-4 top-4 rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="absolute right-0 top-0 rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
               onClick={onClose}
             >
               <X className="h-5 w-5" />
@@ -62,7 +62,7 @@ export const Dialog: React.FC<DialogProps> = ({
           </div>
           
           {/* Content */}
-          <div className="px-6 py-4">
+          <div className=" py-0">
             {children}
           </div>
         </div>
