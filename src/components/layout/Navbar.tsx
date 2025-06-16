@@ -93,10 +93,10 @@ export const Navbar: React.FC = () => {
       <div className="space-y-3 flex-1 overflow-y-auto">
         <div className="px-2 pt-2">
           <div className="flex items-center space-x-3 text-foreground">
-            <Avatar name={isAuthenticated ? user?.name || 'User' : 'Anonymous User'} size="lg" />
+            <Avatar name={isAuthenticated ? user?.name || 'User' : 'Anony Moose'} size="lg" />
             <div>
               <h3 className="font-semibold text-lg">
-                {isAuthenticated ? user?.name || 'User' : 'Anonymous User'}
+                {isAuthenticated ? user?.name || 'User' : 'Anony Moose'}
               </h3>
               <p className="text-sm text-muted-foreground">
                 {isAuthenticated ? user?.email || '' : 'Sign in to access all features'}
@@ -239,7 +239,7 @@ export const Navbar: React.FC = () => {
                     {!isAuthenticated ? '1' : unreadCount > 99 ? '99+' : unreadCount}
                   </Badge>
                 )}
-                <Avatar src={user?.profileImage} name={isAuthenticated ? user?.name || 'User' : 'Anonymous User'} size="sm" />
+                <Avatar src={user?.profileImage} name={isAuthenticated ? user?.name || 'User' : 'Anony Moose'} size="sm" />
               </div>
             </button>
           </div>
