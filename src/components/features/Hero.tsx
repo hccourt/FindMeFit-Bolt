@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Calendar, MapPin, User } from 'lucide-react';
+import { ArrowRight, Calendar, MapPin, User, LogIn, UserPlus, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Container } from '../ui/Container';
 import { Button } from '../ui/Button';
@@ -16,20 +16,42 @@ export const Hero: React.FC = () => {
             Connect with top fitness instructors for personalized training or join group classes that match your goals and schedule.
           </p>
           
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto mb-12">
-            <div className="bg-white rounded-full shadow-lg p-2 flex items-center focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2 transition-all duration-200">
-              <div className="flex-1 min-w-0 px-4">
-                <input
-                  type="text"
-                  placeholder="Search classes, trainers, or locations"
-                  className="w-full h-12 bg-transparent border-0 focus:ring-0 focus:outline-none text-lg text-neutral-900 placeholder:text-neutral-500"
-                />
-              </div>
-              <Button size="lg" className="rounded-full px-8">
-                Search
+          {/* Discover Button */}
+          <div className="mb-4 sm:mb-6">
+            <Link to="/discover" className="inline-block w-full sm:w-auto">
+              <Button 
+                size="lg" 
+                variant="secondary"
+                className="w-full rounded-full hover:bg-secondary/60 active:bg-secondary/50 transition-colors"
+                leftIcon={<Search size={20} />}
+                rightIcon={<ArrowRight size={20} />}
+              >
+                Discover Classes
               </Button>
-            </div>
+            </Link>
+          </div>
+
+          {/* Auth Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto mb-12">
+            <Link to="/login" className="w-full sm:w-auto">
+              <Button 
+                size="lg" 
+                className="w-full rounded-full hover:bg-primary/80 active:bg-primary/70 transition-colors"
+                leftIcon={<LogIn size={20} />}
+              >
+                Login
+              </Button>
+            </Link>
+            <Link to="/signup" className="w-full sm:w-auto">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="w-full rounded-full border-2 border-primary text-primary hover:bg-primary/5 hover:text-primary/80 active:bg-primary/10 transition-colors"
+                leftIcon={<UserPlus size={20} />}
+              >
+                Sign Up
+              </Button>
+            </Link>
           </div>
           
           <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto">
