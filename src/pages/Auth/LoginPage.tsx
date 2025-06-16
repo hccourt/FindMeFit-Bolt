@@ -62,13 +62,7 @@ export const LoginPage: React.FC = () => {
   return (
     <Layout hideFooter>
       <Container size="sm" className="py-12 md:py-16">
-        <div className="flex justify-center mb-8">
-          <Link to="/" className="flex items-center space-x-2">
-            <MapPin className="h-8 w-8 text-primary-500" />
-            <span className="text-xl font-bold text-neutral-900">FindMeFit</span>
-          </Link>
-        </div>
-        
+                
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
