@@ -210,7 +210,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-8 py-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input text-foreground"
                 placeholder="Search for your location..."
-            
+                autoFocus
               />
               {searchTerm && (
                 <button
