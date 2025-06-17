@@ -4,6 +4,54 @@ import { supabase } from './supabase';
 import { Class, Booking, User, Location, RegionSettings, UserRole, CreateClassRpcPayload, Notification, NotificationType, Toast } from './types';
 import { searchLocations as searchLocationsApi } from './geocoding';
 
+interface Venue {
+  id: string;
+  name: string;
+  postal_code: string;
+  city: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  verified: boolean;
+  verified_at?: string;
+  verified_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Profile {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  profile_image?: string;
+  bio?: string;
+  location?: string;
+  phone?: string;
+  rating?: number;
+  review_count?: number;
+  experience?: number;
+  specialties?: string[];
+  joined?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface NotificationState {
+  notifications: Notification[];
+  unreadCount: number;
+  toasts: Toast[];
+  isLoading: boolean;
+  fetchNotifications: () => Promise<void>;
+  markAsRead: (notificationId: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+  deleteNotification: (notificationId: string) => Promise<void>;
+  addToast: (toast: Omit<Toast, 'id'>) => void;
+  removeToast: (toastId: string) => void;
+  subscribeToNotifications: () => void;
+}
+
 interface ClassState {
   classes: Class[];
   bookings: Booking[];
@@ -987,3 +1035,140 @@ export const useNotificationStore = create<NotificationState>()(
         
         const notifications = data || [];
         const unreadCount = notifications.filter(n => !n.read).length;
+        
+        set({ 
+          notifications, 
+          unreadCount, 
+          isLoading: false 
+        });
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        set({ isLoading: false });
+      }
+    },
+    
+    markAsRead: async (notificationId: string) => {
+      try {
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .eq('id', notificationId);
+        
+        if (error) throw error;
+        
+        set(state => ({
+          notifications: state.notifications.map(n => 
+            n.id === notificationId ? { ...n, read: true } : n
+          ),
+          unreadCount: Math.max(0, state.unreadCount - 1)
+        }));
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
+    },
+    
+    markAllAsRead: async () => {
+      const user = useAuthStore.getState().user;
+      if (!user) return;
+      
+      try {
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .eq('user_id', user.id)
+          .eq('read', false);
+        
+        if (error) throw error;
+        
+        set(state => ({
+          notifications: state.notifications.map(n => ({ ...n, read: true })),
+          unreadCount: 0
+        }));
+      } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+      }
+    },
+    
+    deleteNotification: async (notificationId: string) => {
+      try {
+        const { error } = await supabase
+          .from('notifications')
+          .delete()
+          .eq('id', notificationId);
+        
+        if (error) throw error;
+        
+        set(state => {
+          const notification = state.notifications.find(n => n.id === notificationId);
+          const wasUnread = notification && !notification.read;
+          
+          return {
+            notifications: state.notifications.filter(n => n.id !== notificationId),
+            unreadCount: wasUnread ? Math.max(0, state.unreadCount - 1) : state.unreadCount
+          };
+        });
+      } catch (error) {
+        console.error('Error deleting notification:', error);
+      }
+    },
+    
+    addToast: (toast: Omit<Toast, 'id'>) => {
+      const id = Math.random().toString(36).substr(2, 9);
+      const newToast = { ...toast, id };
+      
+      set(state => ({
+        toasts: [...state.toasts, newToast]
+      }));
+      
+      // Auto-remove toast after duration
+      if (toast.duration !== 0) {
+        setTimeout(() => {
+          get().removeToast(id);
+        }, toast.duration || 5000);
+      }
+    },
+    
+    removeToast: (toastId: string) => {
+      set(state => ({
+        toasts: state.toasts.filter(t => t.id !== toastId)
+      }));
+    },
+    
+    subscribeToNotifications: () => {
+      const user = useAuthStore.getState().user;
+      if (!user) return;
+      
+      const subscription = supabase
+        .channel('notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            const newNotification = payload.new as Notification;
+            set(state => ({
+              notifications: [newNotification, ...state.notifications],
+              unreadCount: state.unreadCount + 1
+            }));
+            
+            // Show toast for new notification
+            get().addToast({
+              type: 'info',
+              title: newNotification.title,
+              message: newNotification.message,
+              duration: 5000
+            });
+          }
+        )
+        .subscribe();
+      
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }))
+);
