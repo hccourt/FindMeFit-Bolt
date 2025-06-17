@@ -554,9 +554,14 @@ export const useAuthStore = create<AuthState>()(
           try {
             set({ isLoading: true });
             
-            // First check if user already exists
-            const { data: existingUser } = await supabase.auth.getUser();
-            if (existingUser?.user?.email === email) {
+            // Check if user already exists in profiles table
+            const { data: existingProfile } = await supabase
+              .from('profiles')
+              .select('email')
+              .eq('email', email)
+              .maybeSingle();
+            
+            if (existingProfile) {
               throw new Error('An account with this email already exists');
             }
             
@@ -569,14 +574,23 @@ export const useAuthStore = create<AuthState>()(
                   role
                 },
                 emailRedirectTo: `${window.location.origin}/auth/confirm`,
-                captchaToken: undefined // Disable captcha for now
               }
             });
             
             if (authError) throw authError;
             
             // Log the response for debugging
-            console.log('Signup response:', { user, session });
+            console.log('Signup response:', { 
+              user: user ? { id: user.id, email: user.email, confirmed: user.email_confirmed_at } : null, 
+              session: session ? 'exists' : 'none' 
+            });
+            
+            // Check if user was created but not confirmed
+            if (user && !user.email_confirmed_at) {
+              console.log('User created but email not confirmed - this is correct');
+            } else if (user && user.email_confirmed_at) {
+              console.log('User created and email already confirmed - this might indicate email confirmation is disabled');
+            }
             
             // Don't log the user in immediately - they need to verify their email first
             set({

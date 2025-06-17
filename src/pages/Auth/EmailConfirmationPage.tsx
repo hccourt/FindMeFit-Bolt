@@ -16,6 +16,9 @@ export const EmailConfirmationPage: React.FC = () => {
   useEffect(() => {
     const confirmEmail = async () => {
       try {
+        console.log('Starting email confirmation process...');
+        console.log('URL params:', Object.fromEntries(searchParams.entries()));
+        
         const token_hash = searchParams.get('token_hash');
         const type = searchParams.get('type');
         const access_token = searchParams.get('access_token');
@@ -23,6 +26,7 @@ export const EmailConfirmationPage: React.FC = () => {
 
         // Handle different types of confirmation URLs
         if (token_hash && type === 'email') {
+          console.log('Using token_hash method for confirmation');
           // New format with token_hash
           const { data, error } = await supabase.auth.verifyOtp({
             token_hash,
@@ -30,16 +34,19 @@ export const EmailConfirmationPage: React.FC = () => {
           });
 
           if (error) {
+            console.error('Token hash verification error:', error);
             setStatus('error');
             setMessage('Failed to confirm email. The link may have expired. Please try signing up again.');
             return;
           }
 
           if (data.user) {
+            console.log('Email confirmed successfully with token_hash');
             setStatus('success');
             setMessage('Your email has been confirmed successfully! You can now sign in to your account.');
           }
         } else if (access_token && refresh_token) {
+          console.log('Using access/refresh token method for confirmation');
           // Legacy format with access/refresh tokens
           const { data, error } = await supabase.auth.setSession({
             access_token,
@@ -47,16 +54,19 @@ export const EmailConfirmationPage: React.FC = () => {
           });
 
           if (error) {
+            console.error('Session verification error:', error);
             setStatus('error');
             setMessage('Failed to confirm email. The link may have expired. Please try signing up again.');
             return;
           }
 
           if (data.user) {
+            console.log('Email confirmed successfully with session tokens');
             setStatus('success');
             setMessage('Your email has been confirmed successfully! You can now sign in to your account.');
           }
         } else {
+          console.error('No valid confirmation parameters found');
           setStatus('error');
           setMessage('Invalid confirmation link. Please try signing up again.');
           return;
