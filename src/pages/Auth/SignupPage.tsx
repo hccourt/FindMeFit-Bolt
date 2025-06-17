@@ -74,10 +74,25 @@ export const SignupPage: React.FC = () => {
     if (!validateForm()) return;
     
     try {
-      await register(name, email, password, role);
+      const result = await register(name, email, password, role);
+      
+      // Show email sent page regardless of whether email confirmation is required
       setShowEmailSent(true);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error creating account. Please try again.';
+      let errorMessage = 'Error creating account. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('already registered')) {
+          errorMessage = 'An account with this email already exists. Try signing in instead.';
+        } else if (error.message.includes('Invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (error.message.includes('Password')) {
+          errorMessage = 'Password must be at least 6 characters long.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       setErrors({
         ...errors,
         form: errorMessage,

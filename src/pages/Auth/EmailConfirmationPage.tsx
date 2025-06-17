@@ -18,43 +18,48 @@ export const EmailConfirmationPage: React.FC = () => {
       try {
         const token_hash = searchParams.get('token_hash');
         const type = searchParams.get('type');
+        const access_token = searchParams.get('access_token');
+        const refresh_token = searchParams.get('refresh_token');
 
-        if (!token_hash || type !== 'email') {
+        // Handle different types of confirmation URLs
+        if (token_hash && type === 'email') {
+          // New format with token_hash
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash,
+            type: 'email'
+          });
+
+          if (error) {
+            setStatus('error');
+            setMessage('Failed to confirm email. The link may have expired. Please try signing up again.');
+            return;
+          }
+
+          if (data.user) {
+            setStatus('success');
+            setMessage('Your email has been confirmed successfully! You can now sign in to your account.');
+          }
+        } else if (access_token && refresh_token) {
+          // Legacy format with access/refresh tokens
+          const { data, error } = await supabase.auth.setSession({
+            access_token,
+            refresh_token
+          });
+
+          if (error) {
+            setStatus('error');
+            setMessage('Failed to confirm email. The link may have expired. Please try signing up again.');
+            return;
+          }
+
+          if (data.user) {
+            setStatus('success');
+            setMessage('Your email has been confirmed successfully! You can now sign in to your account.');
+          }
+        } else {
           setStatus('error');
           setMessage('Invalid confirmation link. Please try signing up again.');
           return;
-        }
-
-        const { data, error } = await supabase.auth.verifyOtp({
-          token_hash,
-          type: 'email'
-        });
-
-        if (error) {
-          setStatus('error');
-          setMessage('Failed to confirm email. The link may have expired. Please try signing up again.');
-          return;
-        }
-
-        if (data.user) {
-          // Create profile if it doesn't exist
-          const userData = data.user.user_metadata;
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .upsert({
-              id: data.user.id,
-              name: userData.name || 'User',
-              email: data.user.email || '',
-              role: userData.role || 'client',
-              joined: new Date().toISOString()
-            });
-
-          if (profileError) {
-            console.error('Error creating profile:', profileError);
-          }
-
-          setStatus('success');
-          setMessage('Your email has been confirmed successfully! You can now sign in to your account.');
         }
       } catch (error) {
         console.error('Email confirmation error:', error);

@@ -553,6 +553,13 @@ export const useAuthStore = create<AuthState>()(
         register: async (name, email, password, role) => {
           try {
             set({ isLoading: true });
+            
+            // First check if user already exists
+            const { data: existingUser } = await supabase.auth.getUser();
+            if (existingUser?.user?.email === email) {
+              throw new Error('An account with this email already exists');
+            }
+            
             const { data: { session, user }, error: authError } = await supabase.auth.signUp({
               email,
               password,
@@ -561,11 +568,15 @@ export const useAuthStore = create<AuthState>()(
                   name,
                   role
                 },
-                emailRedirectTo: `${window.location.origin}/auth/confirm`
+                emailRedirectTo: `${window.location.origin}/auth/confirm`,
+                captchaToken: undefined // Disable captcha for now
               }
             });
             
             if (authError) throw authError;
+            
+            // Log the response for debugging
+            console.log('Signup response:', { user, session });
             
             // Don't log the user in immediately - they need to verify their email first
             set({
@@ -573,6 +584,8 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: false,
               isLoading: false
             });
+            
+            return { user, needsVerification: !user?.email_confirmed_at };
           } catch (error) {
             console.error('Error registering:', error);
             throw error;
