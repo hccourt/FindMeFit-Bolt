@@ -74,7 +74,12 @@ export const SignupPage: React.FC = () => {
     
     try {
       await register(name, email, password, role);
-      navigate('/dashboard');
+      // Show success message instead of navigating
+      setErrors({
+        ...errors,
+        form: '',
+      });
+      alert('Registration successful! Please check your email to verify your account before signing in.');
     } catch (error) {
       setErrors({
         ...errors,
