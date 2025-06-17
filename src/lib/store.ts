@@ -561,33 +561,18 @@ export const useAuthStore = create<AuthState>()(
                   name,
                   role
                 },
-                emailRedirectTo: `${window.location.origin}/auth/callback`
+                emailRedirectTo: `${window.location.origin}/auth/confirm`
               }
             });
             
             if (authError) throw authError;
             
-            if (user) {
-              const { data: newProfile, error: profileError } = await supabase
-                .from('profiles')
-                .insert({
-                  id: user.id,
-                  name,
-                  email,
-                  role,
-                  joined: new Date().toISOString()
-                })
-                .select()
-                .single();
-              
-              if (profileError) throw profileError;
-              
-              set({
-                user: newProfile,
-                isAuthenticated: true,
-                isLoading: false
-              });
-            }
+            // Don't log the user in immediately - they need to verify their email first
+            set({
+              user: null,
+              isAuthenticated: false,
+              isLoading: false
+            });
           } catch (error) {
             console.error('Error registering:', error);
             throw error;

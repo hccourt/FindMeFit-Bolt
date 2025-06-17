@@ -18,6 +18,7 @@ export const SignupPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState<UserRole>('client');
+  const [showEmailSent, setShowEmailSent] = useState(false);
   const [errors, setErrors] = useState({
     name: '',
     email: '',
@@ -74,19 +75,67 @@ export const SignupPage: React.FC = () => {
     
     try {
       await register(name, email, password, role);
-      // Show success message instead of navigating
-      setErrors({
-        ...errors,
-        form: '',
-      });
-      alert('Registration successful! Please check your email to verify your account before signing in.');
+      setShowEmailSent(true);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error creating account. Please try again.';
       setErrors({
         ...errors,
-        form: 'Error creating account. Please try again.',
+        form: errorMessage,
       });
     }
   };
+  
+  if (showEmailSent) {
+    return (
+      <Layout hideFooter>
+        <Container size="sm" className="py-16">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl text-center">Check Your Email</CardTitle>
+              <CardDescription className="text-center">
+                We've sent you a verification link
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="py-8">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Mail className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-4">
+                  Verification Email Sent
+                </h3>
+                <p className="text-muted-foreground mb-6 leading-relaxed">
+                  We've sent a verification link to <strong>{email}</strong>. 
+                  Please check your email and click the link to activate your account.
+                </p>
+                <div className="bg-muted p-4 rounded-lg mb-6">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Didn't receive the email?</strong> Check your spam folder or try signing up again.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowEmailSent(false)}
+                    className="w-full"
+                  >
+                    Back to Sign Up
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => navigate('/login')}
+                    className="w-full"
+                  >
+                    Already verified? Sign In
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Container>
+      </Layout>
+    );
+  }
   
   return (
     <Layout hideFooter>
