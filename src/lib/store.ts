@@ -610,15 +610,20 @@ export const useAuthStore = create<AuthState>()(
         logout: async () => {
           try {
             const { error } = await supabase.auth.signOut();
-            if (error) throw error;
+            if (error) {
+              console.warn('Error during logout:', error);
+              // Don't throw the error - we still want to clear local state
+            }
           } catch (error) {
-            console.error('Error signing out:', error);
+            console.warn('Error signing out:', error);
+            // Don't re-throw - we still want to clear local state
+          } finally {
+            // Always clear local state and force clear any remaining session data
+            set({
+              user: null,
+              isAuthenticated: false,
+            });
           }
-          
-          set({
-            user: null,
-            isAuthenticated: false,
-          });
         },
         checkAuth: async () => {
           try {
@@ -968,219 +973,3 @@ export const useStore = create<StoreState>((set) => ({
               currentParticipants: c.currentParticipants + 1
             };
           }
-          return c;
-        })
-      }));
-      
-      return data;
-    } catch (error) {
-      console.error('Error booking class:', error);
-      throw error;
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  cancelBooking: async (bookingId: string) => {
-    set({ isLoading: true });
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: 'cancelled' })
-        .eq('id', bookingId);
-      
-      if (error) throw error;
-      
-      set(state => {
-        const booking = state.bookings.find(b => b.id === bookingId);
-        if (!booking) return state;
-        
-        const updatedClasses = state.classes.map(c => {
-          if (c.id === booking.class_id) {
-            return {
-              ...c,
-              currentParticipants: Math.max(0, c.currentParticipants - 1),
-            };
-          }
-          return c;
-        });
-        
-        return {
-          classes: updatedClasses,
-          bookings: state.bookings.filter(b => b.id !== bookingId),
-          isLoading: false,
-        };
-      });
-    } catch (error) {
-      console.error('Error cancelling booking:', error);
-      throw error;
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  clearBookings: () => {
-    set({ bookings: [] });
-  },
-}));
-
-export const useNotificationStore = create<NotificationState>()(
-  devtools((set, get) => ({
-    notifications: [],
-    unreadCount: 0,
-    toasts: [],
-    isLoading: false,
-    
-    fetchNotifications: async () => {
-      const user = useAuthStore.getState().user;
-      if (!user) return;
-      
-      set({ isLoading: true });
-      try {
-        const { data, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        const notifications = data || [];
-        const unreadCount = notifications.filter(n => !n.read).length;
-        
-        set({ 
-          notifications, 
-          unreadCount, 
-          isLoading: false 
-        });
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-        set({ isLoading: false });
-      }
-    },
-    
-    markAsRead: async (notificationId: string) => {
-      try {
-        const { error } = await supabase
-          .from('notifications')
-          .update({ read: true })
-          .eq('id', notificationId);
-        
-        if (error) throw error;
-        
-        set(state => ({
-          notifications: state.notifications.map(n => 
-            n.id === notificationId ? { ...n, read: true } : n
-          ),
-          unreadCount: Math.max(0, state.unreadCount - 1)
-        }));
-      } catch (error) {
-        console.error('Error marking notification as read:', error);
-      }
-    },
-    
-    markAllAsRead: async () => {
-      const user = useAuthStore.getState().user;
-      if (!user) return;
-      
-      try {
-        const { error } = await supabase
-          .from('notifications')
-          .update({ read: true })
-          .eq('user_id', user.id)
-          .eq('read', false);
-        
-        if (error) throw error;
-        
-        set(state => ({
-          notifications: state.notifications.map(n => ({ ...n, read: true })),
-          unreadCount: 0
-        }));
-      } catch (error) {
-        console.error('Error marking all notifications as read:', error);
-      }
-    },
-    
-    deleteNotification: async (notificationId: string) => {
-      try {
-        const { error } = await supabase
-          .from('notifications')
-          .delete()
-          .eq('id', notificationId);
-        
-        if (error) throw error;
-        
-        set(state => {
-          const notification = state.notifications.find(n => n.id === notificationId);
-          const wasUnread = notification && !notification.read;
-          
-          return {
-            notifications: state.notifications.filter(n => n.id !== notificationId),
-            unreadCount: wasUnread ? Math.max(0, state.unreadCount - 1) : state.unreadCount
-          };
-        });
-      } catch (error) {
-        console.error('Error deleting notification:', error);
-      }
-    },
-    
-    addToast: (toast: Omit<Toast, 'id'>) => {
-      const id = Math.random().toString(36).substr(2, 9);
-      const newToast = { ...toast, id };
-      
-      set(state => ({
-        toasts: [...state.toasts, newToast]
-      }));
-      
-      // Auto-remove toast after duration
-      if (toast.duration !== 0) {
-        setTimeout(() => {
-          get().removeToast(id);
-        }, toast.duration || 5000);
-      }
-    },
-    
-    removeToast: (toastId: string) => {
-      set(state => ({
-        toasts: state.toasts.filter(t => t.id !== toastId)
-      }));
-    },
-    
-    subscribeToNotifications: () => {
-      const user = useAuthStore.getState().user;
-      if (!user) return;
-      
-      const subscription = supabase
-        .channel('notifications')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'notifications',
-            filter: `user_id=eq.${user.id}`
-          },
-          (payload) => {
-            const newNotification = payload.new as Notification;
-            set(state => ({
-              notifications: [newNotification, ...state.notifications],
-              unreadCount: state.unreadCount + 1
-            }));
-            
-            // Show toast for new notification
-            get().addToast({
-              type: 'info',
-              title: newNotification.title,
-              message: newNotification.message,
-              duration: 5000
-            });
-          }
-        )
-        .subscribe();
-      
-      return () => {
-        subscription.unsubscribe();
-      };
-    }
-  }))
-);
