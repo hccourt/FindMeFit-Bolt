@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Email | FindMeFit</title>
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: #f8fafc;
+      color: #334155;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+    .header {
+      background-color: #3b82f6;
+      padding: 24px;
+      text-align: center;
+    }
+    .header h1 {
+      color: white;
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .content {
+      padding: 32px;
+    }
+    .logo {
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #1e293b;
+    }
+    .text {
+      margin-bottom: 24px;
+      color: #475569;
+    }
+    .button {
+      display: inline-block;
+      background-color: #3b82f6;
+      color: white;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin: 16px 0;
+    }
+    .footer {
+      text-align: center;
+      padding: 16px;
+      color: #64748b;
+      font-size: 14px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .highlight {
+      font-weight: 600;
+      color: #1e293b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="logo">FindMeFit</div>
+        <h1>Verify Your Email</h1>
+      </div>
+      
+      <div class="content">
+        <h2 class="title">Welcome to FindMeFit!</h2>
+        <p class="text">Thank you for signing up. Please verify your email address by clicking the button below:</p>
+        
+        <a href="{{ .ConfirmationURL }}" class="button">Verify Email</a>
+        
+        <p class="text">If you didn't create an account with FindMeFit, you can safely ignore this email.</p>
+        
+        <p class="text">This link will expire in 24 hours.</p>
+      </div>
+      
+      <div class="footer">
+        <p>© 2023 FindMeFit. All rights reserved.</p>
+        <p>If you're having trouble with the button above, copy and paste this URL into your browser:</p>
+        <p>{{ .ConfirmationURL }}</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
