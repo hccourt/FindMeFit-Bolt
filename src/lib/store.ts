@@ -4,6 +4,54 @@ import { supabase } from './supabase';
 import { Class, Booking, User, Location, RegionSettings, UserRole, CreateClassRpcPayload, Notification, NotificationType, Toast } from './types';
 import { searchLocations as searchLocationsApi } from './geocoding';
 
+interface Venue {
+  id: string;
+  name: string;
+  postal_code: string;
+  city: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  verified: boolean;
+  verified_at?: string;
+  verified_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Profile {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  profile_image?: string;
+  bio?: string;
+  location?: string;
+  phone?: string;
+  rating?: number;
+  review_count?: number;
+  experience?: number;
+  specialties?: string[];
+  joined?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface NotificationState {
+  notifications: Notification[];
+  unreadCount: number;
+  toasts: Toast[];
+  isLoading: boolean;
+  fetchNotifications: () => Promise<void>;
+  markAsRead: (notificationId: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+  deleteNotification: (notificationId: string) => Promise<void>;
+  addToast: (toast: Omit<Toast, 'id'>) => void;
+  removeToast: (toastId: string) => void;
+  subscribeToNotifications: () => void;
+}
+
 interface ClassState {
   classes: Class[];
   bookings: Booking[];
@@ -505,6 +553,18 @@ export const useAuthStore = create<AuthState>()(
         register: async (name, email, password, role) => {
           try {
             set({ isLoading: true });
+            
+            // Check if user already exists in profiles table
+            const { data: existingProfile } = await supabase
+              .from('profiles')
+              .select('email')
+              .eq('email', email)
+              .maybeSingle();
+            
+            if (existingProfile) {
+              throw new Error('An account with this email already exists');
+            }
+            
             const { data: { session, user }, error: authError } = await supabase.auth.signUp({
               email,
               password,
@@ -513,33 +573,33 @@ export const useAuthStore = create<AuthState>()(
                   name,
                   role
                 },
-                emailRedirectTo: `${window.location.origin}/auth/callback`
+                emailRedirectTo: `${window.location.origin}/auth/confirm`,
               }
             });
             
             if (authError) throw authError;
             
-            if (user) {
-              const { data: newProfile, error: profileError } = await supabase
-                .from('profiles')
-                .insert({
-                  id: user.id,
-                  name,
-                  email,
-                  role,
-                  joined: new Date().toISOString()
-                })
-                .select()
-                .single();
-              
-              if (profileError) throw profileError;
-              
-              set({
-                user: newProfile,
-                isAuthenticated: true,
-                isLoading: false
-              });
+            // Log the response for debugging
+            console.log('Signup response:', { 
+              user: user ? { id: user.id, email: user.email, confirmed: user.email_confirmed_at } : null, 
+              session: session ? 'exists' : 'none' 
+            });
+            
+            // Check if user was created but not confirmed
+            if (user && !user.email_confirmed_at) {
+              console.log('User created but email not confirmed - this is correct');
+            } else if (user && user.email_confirmed_at) {
+              console.log('User created and email already confirmed - this might indicate email confirmation is disabled');
             }
+            
+            // Don't log the user in immediately - they need to verify their email first
+            set({
+              user: null,
+              isAuthenticated: false,
+              isLoading: false
+            });
+            
+            return { user, needsVerification: !user?.email_confirmed_at };
           } catch (error) {
             console.error('Error registering:', error);
             throw error;
@@ -964,21 +1024,6 @@ export const useStore = create<StoreState>((set) => ({
   },
 }));
 
-interface NotificationState {
-  notifications: Notification[];
-  unreadCount: number;
-  toasts: Toast[];
-  isLoading: boolean;
-  fetchNotifications: () => Promise<void>;
-  markAsRead: (notificationId: string) => Promise<void>;
-  markAllAsRead: () => Promise<void>;
-  deleteNotification: (notificationId: string) => Promise<void>;
-  addToast: (toast: Omit<Toast, 'id'>) => void;
-  removeToast: (toastId: string) => void;
-  subscribeToNotifications: () => () => void;
-  createNotification: (userId: string, type: NotificationType, title: string, message: string, data?: Record<string, any>) => Promise<void>;
-}
-
 export const useNotificationStore = create<NotificationState>()(
   devtools((set, get) => ({
     notifications: [],
@@ -987,7 +1032,7 @@ export const useNotificationStore = create<NotificationState>()(
     isLoading: false,
     
     fetchNotifications: async () => {
-      const { user } = useAuthStore.getState();
+      const user = useAuthStore.getState().user;
       if (!user) return;
       
       set({ isLoading: true });
@@ -996,15 +1041,18 @@ export const useNotificationStore = create<NotificationState>()(
           .from('notifications')
           .select('*')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(50);
+          .order('created_at', { ascending: false });
         
         if (error) throw error;
         
         const notifications = data || [];
         const unreadCount = notifications.filter(n => !n.read).length;
         
-        set({ notifications, unreadCount, isLoading: false });
+        set({ 
+          notifications, 
+          unreadCount, 
+          isLoading: false 
+        });
       } catch (error) {
         console.error('Error fetching notifications:', error);
         set({ isLoading: false });
@@ -1013,14 +1061,15 @@ export const useNotificationStore = create<NotificationState>()(
     
     markAsRead: async (notificationId: string) => {
       try {
-        const { error } = await supabase.rpc('mark_notification_read', {
-          notification_id: notificationId
-        });
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .eq('id', notificationId);
         
         if (error) throw error;
         
         set(state => ({
-          notifications: state.notifications.map(n =>
+          notifications: state.notifications.map(n => 
             n.id === notificationId ? { ...n, read: true } : n
           ),
           unreadCount: Math.max(0, state.unreadCount - 1)
@@ -1031,13 +1080,15 @@ export const useNotificationStore = create<NotificationState>()(
     },
     
     markAllAsRead: async () => {
-      const { user } = useAuthStore.getState();
+      const user = useAuthStore.getState().user;
       if (!user) return;
       
       try {
-        const { error } = await supabase.rpc('mark_all_notifications_read', {
-          p_user_id: user.id
-        });
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .eq('user_id', user.id)
+          .eq('read', false);
         
         if (error) throw error;
         
@@ -1074,7 +1125,7 @@ export const useNotificationStore = create<NotificationState>()(
     },
     
     addToast: (toast: Omit<Toast, 'id'>) => {
-      const id = Date.now().toString();
+      const id = Math.random().toString(36).substr(2, 9);
       const newToast = { ...toast, id };
       
       set(state => ({
@@ -1082,10 +1133,11 @@ export const useNotificationStore = create<NotificationState>()(
       }));
       
       // Auto-remove toast after duration
-      const duration = toast.duration || 5000;
-      setTimeout(() => {
-        get().removeToast(id);
-      }, duration);
+      if (toast.duration !== 0) {
+        setTimeout(() => {
+          get().removeToast(id);
+        }, toast.duration || 5000);
+      }
     },
     
     removeToast: (toastId: string) => {
@@ -1095,8 +1147,8 @@ export const useNotificationStore = create<NotificationState>()(
     },
     
     subscribeToNotifications: () => {
-      const { user } = useAuthStore.getState();
-      if (!user) return () => {};
+      const user = useAuthStore.getState().user;
+      if (!user) return;
       
       const subscription = supabase
         .channel('notifications')
@@ -1109,37 +1161,19 @@ export const useNotificationStore = create<NotificationState>()(
             filter: `user_id=eq.${user.id}`
           },
           (payload) => {
-            const notification = payload.new as Notification;
-            
+            const newNotification = payload.new as Notification;
             set(state => ({
-              notifications: [notification, ...state.notifications],
+              notifications: [newNotification, ...state.notifications],
               unreadCount: state.unreadCount + 1
             }));
             
-            // Show toast notification
+            // Show toast for new notification
             get().addToast({
-              type: notification.type,
-              title: notification.title,
-              message: notification.message
+              type: 'info',
+              title: newNotification.title,
+              message: newNotification.message,
+              duration: 5000
             });
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'notifications',
-            filter: `user_id=eq.${user.id}`
-          },
-          (payload) => {
-            const notification = payload.new as Notification;
-            
-            set(state => ({
-              notifications: state.notifications.map(n =>
-                n.id === notification.id ? notification : n
-              )
-            }));
           }
         )
         .subscribe();
@@ -1147,22 +1181,6 @@ export const useNotificationStore = create<NotificationState>()(
       return () => {
         subscription.unsubscribe();
       };
-    },
-    
-    createNotification: async (userId: string, type: NotificationType, title: string, message: string, data = {}) => {
-      try {
-        const { error } = await supabase.rpc('create_notification', {
-          p_user_id: userId,
-          p_type: type,
-          p_title: title,
-          p_message: message,
-          p_data: data
-        });
-        
-        if (error) throw error;
-      } catch (error) {
-        console.error('Error creating notification:', error);
-      }
     }
   }))
 );
