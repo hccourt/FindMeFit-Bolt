@@ -964,19 +964,26 @@ export const useStore = create<StoreState>((set) => ({
   },
 }));
 
-interface NotificationState {
-  notifications: Notification[];
-  unreadCount: number;
-  toasts: Toast[];
-  isLoading: boolean;
-  fetchNotifications: () => Promise<void>;
-  markAsRead: (notificationId: string) => Promise<void>;
-  markAllAsRead: () => Promise<void>;
-  deleteNotification: (notificationId: string) => Promise<void>;
-  addToast: (toast: Omit<Toast, 'id'>) => void;
-  removeToast: (toastId: string) => void;
-  subscribeToNotifications: () => () => void;
-  createNotification: (userId: string, type: NotificationType, title: string, message: string, data?: Record<string, any>) => Promise<void>;
-}
-
-export const useNotificationStore = create
+export const useNotificationStore = create<NotificationState>()(
+  devtools((set, get) => ({
+    notifications: [],
+    unreadCount: 0,
+    toasts: [],
+    isLoading: false,
+    
+    fetchNotifications: async () => {
+      const user = useAuthStore.getState().user;
+      if (!user) return;
+      
+      set({ isLoading: true });
+      try {
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        const notifications = data || [];
+        const unreadCount = notifications.filter(n => !n.read).length;
