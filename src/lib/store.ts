@@ -749,15 +749,6 @@ export const useLocationStore = create<LocationState>()(
           set({ isRequestingLocation: true });
           
           try {
-            // Show toast notification
-            const notificationStore = useNotificationStore.getState();
-            notificationStore.addToast({
-              type: 'system_announcement',
-              title: 'Getting your location...',
-              message: 'We\'re finding fitness classes in your area',
-              duration: 3000
-            });
-            
             // Check if geolocation is supported
             if (!navigator.geolocation) {
               console.log('Geolocation is not supported by this browser');
@@ -820,14 +811,6 @@ export const useLocationStore = create<LocationState>()(
             // Set the location
             get().setLocation(userLocation);
             
-            // Show success toast
-            notificationStore.addToast({
-              type: 'system_announcement',
-              title: 'Location updated!',
-              message: `Now showing classes in ${locationName}`,
-              duration: 4000
-            });
-            
             // Update region based on country
             const countryToRegion: Record<string, string> = {
               'United Kingdom': 'gb',
@@ -860,14 +843,6 @@ export const useLocationStore = create<LocationState>()(
               const regionStore = useRegionStore.getState();
               regionStore.setRegion(regionId);
               
-              // Show loading toast for classes
-              notificationStore.addToast({
-                type: 'system_announcement',
-                title: 'Loading classes...',
-                message: 'Finding fitness options in your area',
-                duration: 2000
-              });
-              
               // Refresh classes after region change
               setTimeout(() => {
                 useClassStore.getState().fetchClasses();
@@ -878,16 +853,6 @@ export const useLocationStore = create<LocationState>()(
             
           } catch (error) {
             console.log('Error getting user location:', error);
-            // Show error toast only for actual errors, not permission denial
-            if (error instanceof GeolocationPositionError && error.code !== error.PERMISSION_DENIED) {
-              const notificationStore = useNotificationStore.getState();
-              notificationStore.addToast({
-                type: 'system_announcement',
-                title: 'Location unavailable',
-                message: 'Unable to get your location. You can set it manually.',
-                duration: 4000
-              });
-            }
             // Don't show error to user, just silently fail
           } finally {
             set({ isRequestingLocation: false });
@@ -966,3 +931,374 @@ export const useRegionStore = create<RegionState>()(
         },
       }),
       {
+        name: 'region-storage',
+      }
+    )
+  )
+);
+
+interface StoreState {
+  classes: Class[];
+  bookings: Booking[];
+  profile: Profile | null;
+  isLoading: boolean;
+  fetchClasses: () => Promise<void>;
+  fetchBookings: () => Promise<void>;
+  fetchProfile: () => Promise<void>;
+  bookClass: (classId: string) => Promise<void>;
+  cancelBooking: (bookingId: string) => Promise<void>;
+  clearBookings: () => void;
+}
+
+export const useStore = create<StoreState>((set) => ({
+  classes: [],
+  bookings: [],
+  profile: null,
+  isLoading: false,
+
+  fetchClasses: async () => {
+    set({ isLoading: true });
+    try {
+      const { data, error } = await supabase
+        .from('classes')
+        .select('*');
+      
+      if (error) throw error;
+      
+      set({ classes: data as Class[], isLoading: false });
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  fetchBookings: async () => {
+    set({ isLoading: true });
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*');
+      
+      if (error) throw error;
+      
+      set({ bookings: data as Booking[], isLoading: false });
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  fetchProfile: async () => {
+    set({ isLoading: true });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user found');
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) throw error;
+      
+      set({ profile: data as Profile, isLoading: false });
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  bookClass: async (classId: string) => {
+    set({ isLoading: true });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user found');
+
+      const { data: classData, error: classError } = await supabase
+        .from('classes')
+        .select('max_participants')
+        .eq('id', classId)
+        .single();
+      
+      if (classError) throw classError;
+      
+      // Get actual participant count from bookings
+      const { data: bookings, error: bookingsError } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('class_id', classId)
+        .eq('status', 'confirmed');
+      
+      if (bookingsError) throw bookingsError;
+      
+      const actualParticipants = bookings?.length || 0;
+      
+      if (!classData || actualParticipants >= classData.max_participants) {
+        throw new Error('Class is full');
+      }
+      
+      const { data: existingBooking, error: bookingCheckError } = await supabase
+        .from('bookings')
+        .select('id, status')
+        .eq('class_id', classId)
+        .eq('user_id', user.id)
+        .not('status', 'eq', 'cancelled')
+        .maybeSingle();
+      
+      if (bookingCheckError) throw bookingCheckError;
+      if (existingBooking) throw new Error('You already have a booking for this class');
+      
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert([
+          {
+            class_id: classId,
+            user_id: user.id,
+            status: 'confirmed',
+            booked_at: new Date().toISOString()
+          }
+        ])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      set(state => ({
+        bookings: [...state.bookings, data as Booking],
+        isLoading: false
+      }));
+      
+      set(state => ({
+        classes: state.classes.map(c => {
+          if (c.id === classId) {
+            return {
+              ...c,
+              currentParticipants: c.currentParticipants + 1
+            };
+          }
+          return c;
+        })
+      }));
+      
+      return data;
+    } catch (error) {
+      console.error('Error booking class:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  cancelBooking: async (bookingId: string) => {
+    set({ isLoading: true });
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', bookingId);
+      
+      if (error) throw error;
+      
+      set(state => {
+        const booking = state.bookings.find(b => b.id === bookingId);
+        if (!booking) return state;
+        
+        const updatedClasses = state.classes.map(c => {
+          if (c.id === booking.class_id) {
+            return {
+              ...c,
+              currentParticipants: Math.max(0, c.currentParticipants - 1),
+            };
+          }
+          return c;
+        });
+        
+        return {
+          classes: updatedClasses,
+          bookings: state.bookings.filter(b => b.id !== bookingId),
+          isLoading: false,
+        };
+      });
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  clearBookings: () => {
+    set({ bookings: [] });
+  },
+}));
+
+export const useNotificationStore = create<NotificationState>()(
+  devtools((set, get) => ({
+    notifications: [],
+    unreadCount: 0,
+    toasts: [],
+    isLoading: false,
+    
+    fetchNotifications: async () => {
+      const user = useAuthStore.getState().user;
+      if (!user) return;
+      
+      set({ isLoading: true });
+      try {
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        const notifications = data || [];
+        const unreadCount = notifications.filter(n => !n.read).length;
+        
+        set({ 
+          notifications, 
+          unreadCount, 
+          isLoading: false 
+        });
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        set({ isLoading: false });
+      }
+    },
+    
+    markAsRead: async (notificationId: string) => {
+      try {
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .eq('id', notificationId);
+        
+        if (error) throw error;
+        
+        set(state => ({
+          notifications: state.notifications.map(n => 
+            n.id === notificationId ? { ...n, read: true } : n
+          ),
+          unreadCount: Math.max(0, state.unreadCount - 1)
+        }));
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
+    },
+    
+    markAllAsRead: async () => {
+      const user = useAuthStore.getState().user;
+      if (!user) return;
+      
+      try {
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .eq('user_id', user.id)
+          .eq('read', false);
+        
+        if (error) throw error;
+        
+        set(state => ({
+          notifications: state.notifications.map(n => ({ ...n, read: true })),
+          unreadCount: 0
+        }));
+      } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+      }
+    },
+    
+    deleteNotification: async (notificationId: string) => {
+      try {
+        const { error } = await supabase
+          .from('notifications')
+          .delete()
+          .eq('id', notificationId);
+        
+        if (error) throw error;
+        
+        set(state => {
+          const notification = state.notifications.find(n => n.id === notificationId);
+          const wasUnread = notification && !notification.read;
+          
+          return {
+            notifications: state.notifications.filter(n => n.id !== notificationId),
+            unreadCount: wasUnread ? Math.max(0, state.unreadCount - 1) : state.unreadCount
+          };
+        });
+      } catch (error) {
+        console.error('Error deleting notification:', error);
+      }
+    },
+    
+    addToast: (toast: Omit<Toast, 'id'>) => {
+      const id = Math.random().toString(36).substr(2, 9);
+      const newToast = { ...toast, id };
+      
+      set(state => ({
+        toasts: [...state.toasts, newToast]
+      }));
+      
+      // Auto-remove toast after duration
+      if (toast.duration !== 0) {
+        setTimeout(() => {
+          get().removeToast(id);
+        }, toast.duration || 5000);
+      }
+    },
+    
+    removeToast: (toastId: string) => {
+      set(state => ({
+        toasts: state.toasts.filter(t => t.id !== toastId)
+      }));
+    },
+    
+    subscribeToNotifications: () => {
+      const user = useAuthStore.getState().user;
+      if (!user) return;
+      
+      const subscription = supabase
+        .channel('notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            const newNotification = payload.new as Notification;
+            set(state => ({
+              notifications: [newNotification, ...state.notifications],
+              unreadCount: state.unreadCount + 1
+            }));
+            
+            // Show toast for new notification
+            get().addToast({
+              type: 'info',
+              title: newNotification.title,
+              message: newNotification.message,
+              duration: 5000
+            });
+          }
+        )
+        .subscribe();
+      
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }))
+);
+
+
+export { useNotificationStore }
