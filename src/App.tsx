@@ -22,6 +22,7 @@ import { CookiesPage } from './pages/CookiesPage'
 import { useAuthStore } from './lib/store'
 import { useScrollToTop } from './lib/hooks'
 import { useThemeStore } from './lib/store'
+import { useLocationStore } from './lib/store'
 import { ToastContainer } from './components/ui/ToastContainer'
 
 function ScrollToTop() {
@@ -32,6 +33,7 @@ function ScrollToTop() {
 function App() {
   const { checkAuth } = useAuthStore()
   const { isDarkMode } = useThemeStore()
+  const { requestUserLocation } = useLocationStore()
   
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', isDarkMode)
@@ -40,6 +42,11 @@ function App() {
   React.useEffect(() => {
     checkAuth()
   }, [checkAuth])
+  
+  React.useEffect(() => {
+    // Request user location when the app loads
+    requestUserLocation()
+  }, [requestUserLocation])
   
   return (
     <Router>

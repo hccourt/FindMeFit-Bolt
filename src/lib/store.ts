@@ -700,6 +700,7 @@ interface LocationState {
   setLocation: (location: Location) => void;
   addRecentLocation: (location: Location) => void;
   searchLocations: (query: string) => Promise<Location[]>;
+  requestUserLocation: () => Promise<void>;
 }
 
 interface RegionState {
@@ -726,6 +727,7 @@ export const useLocationStore = create<LocationState>()(
       (set, get) => ({
         currentLocation: null,
         recentLocations: [],
+        isRequestingLocation: false,
         setLocation: (location) => {
           set({ currentLocation: location });
           get().addRecentLocation(location);
@@ -742,6 +744,119 @@ export const useLocationStore = create<LocationState>()(
         searchLocations: async (query) => {
           if (!query || query.length < 2) return [];
           return searchLocationsApi(query);
+        },
+        requestUserLocation: async () => {
+          set({ isRequestingLocation: true });
+          
+          try {
+            // Check if geolocation is supported
+            if (!navigator.geolocation) {
+              console.log('Geolocation is not supported by this browser');
+              return;
+            }
+            
+            // Request user's current position
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(
+                resolve,
+                reject,
+                {
+                  enableHighAccuracy: true,
+                  timeout: 10000,
+                  maximumAge: 300000 // 5 minutes
+                }
+              );
+            });
+            
+            const { latitude, longitude } = position.coords;
+            console.log('User location:', { latitude, longitude });
+            
+            // Reverse geocode to get location name
+            const response = await fetch(
+              `/api/nominatim/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&accept-language=en`
+            );
+            
+            if (!response.ok) {
+              throw new Error('Failed to reverse geocode location');
+            }
+            
+            const data = await response.json();
+            console.log('Reverse geocoding result:', data);
+            
+            // Extract location information
+            const address = data.address || {};
+            const city = address.city || address.town || address.village || address.hamlet || 'Unknown City';
+            const country = address.country || 'Unknown Country';
+            const state = address.state || address.region || '';
+            
+            const locationName = city;
+            const parentName = state ? `${state}, ${country}` : country;
+            
+            // Create location object
+            const userLocation: Location = {
+              id: `user-location-${Date.now()}`,
+              name: locationName,
+              type: 'city',
+              parent: {
+                id: 'parent-location',
+                name: parentName,
+                type: 'country'
+              },
+              coordinates: {
+                latitude,
+                longitude
+              }
+            };
+            
+            // Set the location
+            get().setLocation(userLocation);
+            
+            // Update region based on country
+            const countryToRegion: Record<string, string> = {
+              'United Kingdom': 'gb',
+              'United States': 'us',
+              'Germany': 'eu',
+              'France': 'eu',
+              'Italy': 'eu',
+              'Spain': 'eu',
+              'Netherlands': 'eu',
+              'Belgium': 'eu',
+              'Austria': 'eu',
+              'Switzerland': 'ch',
+              'Australia': 'au',
+              'Canada': 'ca',
+              'Japan': 'jp',
+              'China': 'cn',
+              'Singapore': 'sg',
+              'India': 'in',
+              'Brazil': 'br',
+              'Russia': 'ru',
+              'South Africa': 'za',
+              'Mexico': 'mx',
+              'United Arab Emirates': 'ae',
+              'New Zealand': 'nz',
+              'Thailand': 'th',
+            };
+            
+            const regionId = countryToRegion[country];
+            if (regionId) {
+              const regionStore = useRegionStore.getState();
+              regionStore.setRegion(regionId);
+              
+              // Refresh classes after region change
+              setTimeout(() => {
+                useClassStore.getState().fetchClasses();
+              }, 0);
+            }
+            
+            console.log('Location set successfully:', userLocation);
+            
+          } catch (error) {
+            console.log('Error getting user location:', error);
+            // Don't show error to user, just silently fail
+          } finally {
+            set({ isRequestingLocation: false });
+          }
         },
       }),
       {

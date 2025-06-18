@@ -20,7 +20,7 @@ const getCountryFlag = (countryCode: string): string => {
 };
 
 export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal = false }) => {
-  const { currentLocation, recentLocations, setLocation, searchLocations } = useLocationStore();
+  const { currentLocation, recentLocations, isRequestingLocation, setLocation, searchLocations, requestUserLocation } = useLocationStore();
   const { currentRegion } = useRegionStore();
   const { user, updateProfile } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
@@ -129,6 +129,11 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal
     setIsOpen(false);
   };
   
+  const handleUseMyLocation = async () => {
+    await requestUserLocation();
+    setIsOpen(false);
+  };
+  
   const getLocationCountryCode = (location: Location | null): string => {
     if (!location?.parent?.name) return 'GB';
     const parts = location.parent.name.split(', ');
@@ -202,6 +207,18 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal
       ) : (
         <>
           <div className="py-4 border-b border-border">
+            <div className="mb-4">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleUseMyLocation}
+                disabled={isRequestingLocation}
+                leftIcon={<MapPin className="h-4 w-4" />}
+              >
+                {isRequestingLocation ? 'Getting location...' : 'Use my current location'}
+              </Button>
+            </div>
+            
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
