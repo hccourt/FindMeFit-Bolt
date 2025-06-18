@@ -12,7 +12,7 @@ import { isCoordinateInRegion } from '../lib/utils';
 export const HomePage: React.FC = () => {
   const { classes, fetchClasses, isLoading } = useClassStore();
   const { currentRegion } = useRegionStore();
-  const { currentLocation } = useLocationStore();
+  const { currentLocation, isRequestingLocation } = useLocationStore();
   
   useEffect(() => {
     fetchClasses();
@@ -61,20 +61,43 @@ export const HomePage: React.FC = () => {
           
           <Container>
             {!currentLocation ? (
-              <div className="text-center py-12 bg-muted rounded-xl">
+              <div className="text-center py-12 bg-muted rounded-xl relative">
+                {isRequestingLocation && (
+                  <div className="absolute inset-0 bg-primary/5 rounded-xl flex items-center justify-center">
+                    <div className="flex items-center gap-3 bg-white dark:bg-card px-6 py-3 rounded-lg shadow-lg border border-border">
+                      <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-foreground font-medium">Getting your location...</span>
+                    </div>
+                  </div>
+                )}
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4">
                   <ArrowRight className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-medium mb-2 text-foreground">Set Your Location</h3>
+                <h3 className="text-lg font-medium mb-2 text-foreground">
+                  {isRequestingLocation ? 'Finding your location...' : 'Set Your Location'}
+                </h3>
                 <p className="text-muted-foreground mb-6">
-                  Choose your location to discover fitness classes and trainers in your area.
+                  {isRequestingLocation 
+                    ? 'We\'re detecting your location to show relevant classes nearby.'
+                    : 'Choose your location to discover fitness classes and trainers in your area.'
+                  }
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  Use the location picker in the top navigation to get started.
-                </p>
+                {!isRequestingLocation && (
+                  <p className="text-sm text-muted-foreground">
+                    Use the location picker in the top navigation to get started.
+                  </p>
+                )}
               </div>
-            ) : isLoading ? (
+            ) : isLoading || isRequestingLocation ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="col-span-full text-center mb-4">
+                  <div className="inline-flex items-center gap-2 text-primary">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm font-medium">
+                      {isRequestingLocation ? 'Finding classes in your area...' : 'Loading featured classes...'}
+                    </span>
+                  </div>
+                </div>
                 {Array(3)
                   .fill(0)
                   .map((_, index) => (

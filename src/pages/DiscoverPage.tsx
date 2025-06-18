@@ -13,7 +13,7 @@ import { isCoordinateInRegion } from '../lib/utils';
 export const DiscoverPage: React.FC = () => {
   const { classes, fetchClasses, isLoading } = useClassStore();
   const { currentRegion } = useRegionStore();
-  const { currentLocation } = useLocationStore();
+  const { currentLocation, isRequestingLocation } = useLocationStore();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -141,7 +141,9 @@ export const DiscoverPage: React.FC = () => {
             <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
               {currentLocation 
                 ? 'Find the perfect workout session that matches your preferences and schedule'
-                : 'Set your location to find fitness classes and trainers in your area'
+                : isRequestingLocation 
+                  ? 'We\'re finding your location to show relevant classes nearby'
+                  : 'Set your location to find fitness classes and trainers in your area'
               }
             </p>
           </div>
@@ -183,15 +185,26 @@ export const DiscoverPage: React.FC = () => {
           ) : (
             <div className="text-center py-8 bg-card border border-border rounded-xl shadow-soft">
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4">
-                <Search className="w-6 h-6" />
+                {isRequestingLocation ? (
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <Search className="w-6 h-6" />
+                )}
               </div>
-              <h3 className="text-lg font-medium mb-2 text-foreground">Set Your Location First</h3>
+              <h3 className="text-lg font-medium mb-2 text-foreground">
+                {isRequestingLocation ? 'Getting Your Location...' : 'Set Your Location First'}
+              </h3>
               <p className="text-muted-foreground mb-4">
-                Please select your location using the location picker in the navigation to discover classes in your area.
+                {isRequestingLocation 
+                  ? 'We\'re detecting your location to show fitness classes in your area.'
+                  : 'Please select your location using the location picker in the navigation to discover classes in your area.'
+                }
               </p>
-              <p className="text-sm text-muted-foreground">
-                Click on the location selector in the top navigation bar to get started.
-              </p>
+              {!isRequestingLocation && (
+                <p className="text-sm text-muted-foreground">
+                  Click on the location selector in the top navigation bar to get started.
+                </p>
+              )}
             </div>
           )}
           
@@ -416,6 +429,14 @@ export const DiscoverPage: React.FC = () => {
           </div>
         ) : isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {isRequestingLocation && (
+              <div className="col-span-full text-center mb-6">
+                <div className="inline-flex items-center gap-2 text-primary bg-primary/10 px-4 py-2 rounded-full">
+                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-sm font-medium">Finding classes in your area...</span>
+                </div>
+              </div>
+            )}
             {Array(6)
               .fill(0)
               .map((_, index) => (

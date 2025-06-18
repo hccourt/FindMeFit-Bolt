@@ -215,7 +215,14 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ className, modal
                 disabled={isRequestingLocation}
                 leftIcon={<MapPin className="h-4 w-4" />}
               >
-                {isRequestingLocation ? 'Getting location...' : 'Use my current location'}
+                {isRequestingLocation ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                    Getting location...
+                  </>
+                ) : (
+                  'Use my current location'
+                )}
               </Button>
             </div>
             
